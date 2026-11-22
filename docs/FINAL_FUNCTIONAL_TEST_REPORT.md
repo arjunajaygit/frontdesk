@@ -152,7 +152,7 @@ Live:
 ## 6. Known limitations (final)
 - **One-week uptime:** time-based, so it cannot be verified yet. Free hosting sleeps when idle (one measured cold start, about 39 s); while asleep, persisted SLA effects can land up to about 30 minutes late (Supabase Cron every 30 minutes).
 - **Accessibility:** no manual screen-reader audit (automated axe and keyboard checks only), so there is no WCAG conformance claim.
-- **CodeQL:** skipped on the private repository; Semgrep is the SAST gate. ZAP is a passive baseline only.
+- **CodeQL:** skipped while the repository was private; it runs on every push since the repository was made public (2026-11-22). ZAP is a passive baseline only.
 - **Image findings:** 38 OS-package findings (11 advisories, no fix available) are accepted conditionally by the owner and re-scanned before each deploy.
 - **Rate limiting:** in-memory, single instance.
 - **Notifications:** no email delivery or read receipts; Frontdesk records when a reply became visible in the app.

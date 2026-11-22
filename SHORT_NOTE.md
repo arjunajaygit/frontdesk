@@ -1,7 +1,7 @@
 # Short note: what I did not finish, and why
 
 **Live:** https://frontdesk-arvo-support.onrender.com (Render Free + Supabase Free, synthetic data only).
-**Repository:** https://github.com/arjunajaygit/frontdesk. It is private, so reviewer access and demo accounts are granted through a private channel.
+**Repository:** https://github.com/arjunajaygit/frontdesk (public). Demo account passwords are shared through a private channel, never in the repository.
 Start with `docs/REVIEWER_WALKTHROUGH.md`. The requirement-by-requirement evidence is in `docs/FINAL_ASSESSMENT_COMPLIANCE.md`, the executed tests in `docs/FINAL_FUNCTIONAL_TEST_REPORT.md`, and the hosting evidence in `docs/M8_DEPLOYMENT_EVIDENCE.md`.
 
 ## Not finished: assessment requirements
@@ -22,7 +22,7 @@ Every functional rule I extracted from the story was implemented and verified: t
 - No text search or aggregate ticket counts.
 - No email notifications. Frontdesk records when a reply became visible in the app; it does not claim delivery or read receipts.
 - Rate limiting is in-memory for a single instance; distributed limiting is not built.
-- Alerts are defined but no notification channel is wired. ZAP is a passive baseline only. CodeQL does not run on the private repository (Semgrep is the SAST gate). A distroless runtime was evaluated and not adopted.
+- Alerts are defined but no notification channel is wired. ZAP is a passive baseline only. CodeQL now runs on every push (enabled when the repository was made public), alongside Semgrep. A distroless runtime was evaluated and not adopted.
 
 ## Constraints and things I could not verify
 

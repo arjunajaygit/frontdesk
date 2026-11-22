@@ -468,7 +468,7 @@ More sequence and class diagrams: [`docs/diagrams/sequences.md`](docs/diagrams/s
 
 ### What you need
 
-Node.js **22.12+**, npm, Git, **Docker Desktop** (or Docker + Compose), and a modern browser. The project is a private repository, so cloning it needs GitHub access. You do **not** need paid hosting or Supabase to run it locally.
+Node.js **22.12+**, npm, Git, **Docker Desktop** (or Docker + Compose), and a modern browser. The repository is public: `git clone https://github.com/arjunajaygit/frontdesk.git`. No GitHub account is needed to clone it. You do **not** need paid hosting or Supabase to run it locally.
 
 ### Step 1 — Get the code
 

@@ -24,7 +24,7 @@ ambiguous points are listed separately (§I). Run totals and commands are in `do
 |---|---|---|---|---|
 | Q1 | A working web application: a backend service and a simple screen for support agents | NestJS API + PostgreSQL; React staff workspace and customer portal, served same-origin | I: 26 integration suites; E: 8 browser spec files incl. the full UI lifecycle; L: smoke 29/29, workflows 29/29, browser 8/8 | PASS |
 | Q2 | Host it online; it will be opened in a browser | Render Free (Docker image from private GHCR) + Supabase PostgreSQL | L: `/api/healthz` reports the deployed commit; HTTPS with HSTS; `hosted-runtime-health` 9/9 screens clean | PASS |
-| Q3 | Send a live URL, a repository link, a README and a short note | URL above; private repo `arjunajaygit/frontdesk`; `README.md`; `SHORT_NOTE.md` | Files exist and were reviewed against the running app (this audit) | PASS (sending them is the owner's action) |
+| Q3 | Send a live URL, a repository link, a README and a short note | URL above; public repo https://github.com/arjunajaygit/frontdesk; `README.md`; `SHORT_NOTE.md` | Files exist and were reviewed against the running app (this audit) | PASS (sending them is the owner's action) |
 
 ## §2 The situation
 
@@ -79,7 +79,7 @@ ambiguous points are listed separately (§I). Run totals and commands are in `do
 
 | ID | Original assessment requirement | Implementation | Test evidence | Status |
 |---|---|---|---|---|
-| D1 | Send the live URL, repository link, README and short note to the person who gave the document | Ready (checklist in `docs/FINAL_FUNCTIONAL_TEST_REPORT.md`) | The repository is private: reviewers need access granted by the owner | NOT VERIFIED (owner action) |
+| D1 | Send the live URL, repository link, README and short note to the person who gave the document | Ready (checklist in `docs/FINAL_FUNCTIONAL_TEST_REPORT.md`); the repository is public, so no reviewer access needs granting | Sending is the owner's action | NOT VERIFIED (owner action) |
 
 ## §I Documented interpretations of ambiguous points
 
@@ -101,7 +101,7 @@ ambiguous points are listed separately (§I). Run totals and commands are in `do
 
 - **PASS:** 41.
 - **FAIL:** 1 (R1, the time budget, disclosed).
-- **NOT VERIFIED:** 2. R5 (one-week uptime) is time-based and not yet observable; D1 (submission and reviewer access) is the owner's action.
+- **NOT VERIFIED:** 2. R5 (one-week uptime) is time-based and not yet observable; D1 (sending the submission) is the owner's action.
 - **PARTIAL:** 0.
 
 Defects found and fixed during this audit are listed in `docs/FINAL_FUNCTIONAL_TEST_REPORT.md`.

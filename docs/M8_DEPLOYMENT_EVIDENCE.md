@@ -7,11 +7,11 @@ simulated. Anything that could not be measured is marked **UNKNOWN**.
 
 | Item | Value |
 |---|---|
-| Repository | https://github.com/arjunajaygit/frontdesk (private; sanitized publication history; see PROVENANCE.md) |
+| Repository | https://github.com/arjunajaygit/frontdesk (made **public** at the owner's request on 2026-11-22 after a full-history check: no secrets, personal data, employer details or infrastructure identifiers; sanitized publication history, see PROVENANCE.md). The GHCR image package remains private. |
 | Released source revision | `741fee7c673f3e903b8f4ea6d50bfb708aaf6ed1` (publication repo; merge of PR #14, the final assessment audit, on top of the redesign) |
 | CI (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45044659609: success (static, unit, PostgreSQL integration incl. PROOF-01..05, Playwright, Docker amd64 smoke/k6/ZAP, release gate) |
 | Security (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45044659628: success (Gitleaks full history, Semgrep, npm audit gate + SBOM, Trivy) |
-| CodeQL | Skipped while the repository is private (code scanning on private repositories is a paid GitHub feature). Semgrep is the mandatory SAST gate. |
+| CodeQL | Skipped while the repository was private (code scanning on private repositories is a paid GitHub feature); runs on every push since it was made public. Semgrep remains the mandatory SAST gate. |
 | Release workflow | https://github.com/arjunajaygit/frontdesk/actions/runs/45045027702: success. Steps: gate (main, exact SHA, passing CI + Security) → one linux/amd64 build → smoke → Trivy gate → SBOM → publish → pull back → config-digest match → keyless sign + CycloneDX attestation → both verified against the exact workflow identity |
 | Registry manifest digest (deployed) | `ghcr.io/arjunajaygit/frontdesk@sha256:aa4577a035a61ec6849f770e77d34530563e08504b3c7e546a829ee95c89baba` (private GHCR package) |
 | Config digest (tested image) | `sha256:dfc85783406015a6322a345104e2e956971474aca0482a3fa98a7e3efea4dde9` (equal to the pulled-back image) |
