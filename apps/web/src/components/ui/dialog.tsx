@@ -1,14 +1,18 @@
 import * as D from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { X, type LucideIcon } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/** Radix Dialog: focus trap, Escape, focus restore and aria wiring come from the primitive. */
+/**
+ * Radix Dialog: focus trap, Escape, focus restore and aria wiring come from the primitive.
+ * Floating glass panel over a softly dimmed workspace; fits the viewport on phones (scrolls inside).
+ */
 export function Dialog({
   open,
   onOpenChange,
   title,
   description,
+  icon: Icon,
   children,
   className,
 }: {
@@ -16,6 +20,7 @@ export function Dialog({
   onOpenChange: (o: boolean) => void;
   title: string;
   description?: string;
+  icon?: LucideIcon;
   children: ReactNode;
   className?: string;
 }) {
@@ -28,24 +33,29 @@ export function Dialog({
   return (
     <D.Root open={open} onOpenChange={onOpenChange}>
       <D.Portal>
-        <D.Overlay className="fixed inset-0 z-40 bg-nav/55" />
+        <D.Overlay className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[3px] data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
         <D.Content
           className={cn(
-            'fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-line bg-surface p-5 shadow-pop',
+            'glass-strong fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-white/60 p-5 shadow-pop ring-1 ring-ink/[0.06] data-[state=closed]:animate-pop-out data-[state=open]:animate-pop-in sm:p-6',
             className,
           )}
-          aria-describedby={description ? undefined : undefined}
+          {...(description ? {} : { 'aria-describedby': undefined })}
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             (opener.current as HTMLElement | null)?.focus?.();
           }}
         >
-          <div className="mb-3 flex items-start justify-between gap-4">
-            <div>
-              <D.Title className="text-base font-semibold text-ink">{title}</D.Title>
-              {description ? <D.Description className="mt-1 text-[13px] text-ink-2">{description}</D.Description> : null}
+          <div className="mb-5 flex items-start gap-3">
+            {Icon ? (
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-brand/15 bg-brand-soft text-brand">
+                <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+              </span>
+            ) : null}
+            <div className="min-w-0 flex-1">
+              <D.Title className="text-title font-semibold text-ink">{title}</D.Title>
+              {description ? <D.Description className="mt-1 text-body text-ink-2">{description}</D.Description> : null}
             </div>
-            <D.Close className="-m-1 rounded-md p-2 text-ink-3 hover:bg-canvas" aria-label="Close dialog">
+            <D.Close className="-m-1.5 rounded-md p-2 text-ink-3 transition-colors hover:bg-ink/[0.06] hover:text-ink" aria-label="Close dialog">
               <X className="h-4 w-4" aria-hidden="true" />
             </D.Close>
           </div>
@@ -55,3 +65,6 @@ export function Dialog({
     </D.Root>
   );
 }
+
+/** Consistent action row: secondary action left of the primary one, stacked full-width on narrow phones. */
+export const DialogActions = ({ children }: { children: ReactNode }) => <div className="mt-6 flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end">{children}</div>;

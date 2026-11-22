@@ -1,7 +1,9 @@
+import { TicketPlus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogActions } from '@/components/ui/dialog';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
+import { Notice } from '@/components/ui/notice';
 import { useToast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import { priorityLabel } from '@/lib/format';
@@ -37,9 +39,9 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="New ticket" description="Record a request on behalf of a customer (phone or email). Your message is stored as the customer's original request." className="max-w-lg">
+    <Dialog open={open} onOpenChange={onOpenChange} icon={TicketPlus} title="New ticket" description="Record a request on behalf of a customer (phone or email). Your message is stored as the customer's original request." className="max-w-lg">
       <form
-        className="space-y-3"
+        className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
@@ -57,7 +59,7 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
             </Select>
           )}
         </Field>
-        <Field label="Subject">{(p) => <Input {...p} required maxLength={200} value={subject} onChange={(e) => setSubject(e.target.value)} />}</Field>
+        <Field label="Subject">{(p) => <Input {...p} required maxLength={200} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Short summary of the request" />}</Field>
         <Field label="Customer's request">{(p) => <Textarea {...p} required maxLength={10_000} value={body} onChange={(e) => setBody(e.target.value)} />}</Field>
         <Field label="Priority" hint="Urgent resolution is due by the end of the working day the ticket starts.">
           {(p) => (
@@ -71,16 +73,16 @@ export function NewTicketDialog({ open, onOpenChange, onCreated }: { open: boole
           )}
         </Field>
         {error ? (
-          <p role="alert" className="text-[13px] font-medium text-danger-ink">
+          <Notice tone="bad" role="alert">
             {error}
-          </p>
+          </Notice>
         ) : null}
-        <div className="flex justify-end gap-2">
+        <DialogActions>
           <Button onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button type="submit" variant="primary" disabled={create.isPending || !customerId || !subject.trim() || !body.trim()}>
             {create.isPending ? 'Creating…' : 'Create ticket'}
           </Button>
-        </div>
+        </DialogActions>
       </form>
     </Dialog>
   );

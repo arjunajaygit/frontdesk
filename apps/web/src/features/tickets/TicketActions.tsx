@@ -1,7 +1,7 @@
 import { CheckCheck, Hand } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogActions } from '@/components/ui/dialog';
 import { Field, Select, Textarea } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
@@ -61,8 +61,10 @@ export function TicketActions({ ticket, viewer }: { ticket: StaffTicket; viewer:
     );
   };
 
+  if (!canClaim && !(isAssignee && open)) return null;
+
   return (
-    <div className="flex flex-wrap items-end gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {canClaim ? (
         <Button variant="primary" onClick={claim} disabled={cmd.isPending}>
           <Hand className="h-3.5 w-3.5" aria-hidden="true" />
@@ -71,8 +73,9 @@ export function TicketActions({ ticket, viewer }: { ticket: StaffTicket; viewer:
       ) : null}
       {isAssignee && open ? (
         <>
-          <div className="flex items-end gap-1.5">
-            <Field label="Ticket priority">
+          {/* Priority: select + explicit apply (a change recalculates deadlines, so it is never applied on selection). */}
+          <div className="flex items-center gap-1.5">
+            <Field label="Ticket priority" hideLabel>
               {(p) => (
                 <Select {...p} value={priority} onChange={(e) => setPriority(e.target.value as Priority)} className="w-32">
                   {PRIORITIES.map((x) => (
@@ -88,25 +91,23 @@ export function TicketActions({ ticket, viewer }: { ticket: StaffTicket; viewer:
             </Button>
           </div>
           {ticket.status === 'IN_PROGRESS' ? (
-            <Button variant="secondary" onClick={() => setResolveOpen(true)}>
-              <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" />
+            <Button variant="secondary" onClick={() => setResolveOpen(true)} className="sm:ml-auto">
+              <CheckCheck className="h-3.5 w-3.5 text-ok" aria-hidden="true" />
               Resolve…
             </Button>
           ) : null}
         </>
       ) : null}
-      <Dialog open={resolveOpen} onOpenChange={setResolveOpen} title="Resolve ticket" description="The customer sees this message. They can reopen the same ticket for seven days.">
-        <div className="space-y-3">
-          <Field label={responsePending ? 'Resolution message (required — no public reply has been sent yet)' : 'Resolution message (optional)'} error={resolveError}>
-            {(p) => <Textarea {...p} value={resolveText} onChange={(e) => setResolveText(e.target.value)} maxLength={10_000} />}
-          </Field>
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => setResolveOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={resolve} disabled={cmd.isPending || (responsePending && !resolveText.trim())}>
-              {cmd.isPending ? 'Resolving…' : 'Resolve ticket'}
-            </Button>
-          </div>
-        </div>
+      <Dialog open={resolveOpen} onOpenChange={setResolveOpen} icon={CheckCheck} title="Resolve ticket" description="The customer sees this message. They can reopen the same ticket for seven days.">
+        <Field label={responsePending ? 'Resolution message (required — no public reply has been sent yet)' : 'Resolution message (optional)'} error={resolveError}>
+          {(p) => <Textarea {...p} value={resolveText} onChange={(e) => setResolveText(e.target.value)} maxLength={10_000} placeholder="Summarise what was done for the customer…" />}
+        </Field>
+        <DialogActions>
+          <Button onClick={() => setResolveOpen(false)}>Cancel</Button>
+          <Button variant="primary" onClick={resolve} disabled={cmd.isPending || (responsePending && !resolveText.trim())}>
+            {cmd.isPending ? 'Resolving…' : 'Resolve ticket'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

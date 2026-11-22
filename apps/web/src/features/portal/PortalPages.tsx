@@ -1,43 +1,51 @@
-import { Download, Headset, LogOut, Plus, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Clock3, Download, Link2, LogOut, MessageSquarePlus, Plus, RotateCcw, Send } from 'lucide-react';
 import { useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
+import { Avatar, LogoMark } from '@/components/ui/identity';
+import { Notice } from '@/components/ui/notice';
 import { EmptyState, ErrorState, LoadingRows } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { ApiError, newIdempotencyKey } from '@/lib/api';
-import { formatIst, statusLabel } from '@/lib/format';
+import { formatIst } from '@/lib/format';
 import type { Priority, PublicMessage, PublicTicketSummary, Status } from '@/lib/types';
 import { useAuth } from '../auth/auth';
+import { statusTone } from '../tickets/badges';
 import { Timeline, type TimelineMessage } from '../tickets/Timeline';
 import { useTimeline } from '../tickets/useTimeline';
 import { fetchOlderPublicMessages, useCreatePortalTicket, usePortalContact, usePortalList, usePortalTicket } from './api';
 
-const STATUS_TONE: Record<Status, 'info' | 'brand' | 'warn' | 'ok' | 'neutral'> = { OPEN: 'info', IN_PROGRESS: 'brand', WAITING: 'warn', RESOLVED: 'ok', CLOSED: 'neutral' };
+/** Customer wording: the same states, phrased from the customer's side. */
+const CUSTOMER_STATUS: Record<Status, string> = { OPEN: 'Open', IN_PROGRESS: 'In progress', WAITING: 'Waiting for your reply', RESOLVED: 'Resolved', CLOSED: 'Closed' };
 const toTimeline = (m: PublicMessage): TimelineMessage => ({ id: m.id, body: m.body, createdAt: m.createdAt, authorName: m.authorDisplayName, authorIsCustomer: m.authorType === 'CUSTOMER' });
+const CustomerStatus = ({ status }: { status: Status }) => <Badge tone={statusTone(status)}>{CUSTOMER_STATUS[status]}</Badge>;
 
 /** Customer-facing shell: its own layout, its own cache namespace, public DTOs only. */
 export function PortalLayout() {
   const { viewer, logout } = useAuth();
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="nav-surface bg-nav text-white">
-        <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-3">
-          <Headset className="h-5 w-5 text-[#7ee0d4]" aria-hidden="true" />
-          <Link to="/portal" className="font-semibold">
-            Frontdesk <span className="font-normal text-nav-text">support portal</span>
+    <div className="flex min-h-dvh flex-col bg-canvas">
+      <header className="glass-canvas sticky top-0 z-20 border-b border-line">
+        <div className="mx-auto flex h-14 max-w-3xl items-center gap-3 px-4">
+          <Link to="/portal" className="flex items-center gap-2.5 rounded-md">
+            <LogoMark className="h-7 w-7" />
+            <span className="text-title font-semibold tracking-[-0.01em]">
+              Frontdesk <span className="font-normal text-ink-3">Support</span>
+            </span>
           </Link>
-          <span className="ml-auto hidden text-[13px] text-nav-text sm:inline" data-testid="viewer-name">
-            {viewer?.displayName}
+          <span className="ml-auto hidden items-center gap-2 text-body text-ink-2 sm:inline-flex">
+            <Avatar name={viewer?.displayName} size="sm" />
+            <span data-testid="viewer-name">{viewer?.displayName}</span>
           </span>
-          <Button variant="nav" size="sm" onClick={() => void logout()}>
+          <Button variant="ghost" size="sm" onClick={() => void logout()} className="ml-auto sm:ml-0">
             <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
             Sign out
           </Button>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 p-4">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6 sm:pt-8">
         <Outlet />
       </main>
     </div>
@@ -49,10 +57,13 @@ export function PortalList() {
   const items = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <section aria-labelledby="my-tickets">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h1 id="my-tickets" className="text-lg font-semibold">
-          Your tickets
-        </h1>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 id="my-tickets" className="text-display font-semibold tracking-[-0.02em]">
+            Your tickets
+          </h1>
+          <p className="mt-1 text-body text-ink-2">Follow your requests and reply to our team in one place.</p>
+        </div>
         <Button variant="primary" asChild>
           <Link to="/portal/new">
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -60,13 +71,23 @@ export function PortalList() {
           </Link>
         </Button>
       </div>
-      <div className="overflow-hidden rounded-lg border border-line bg-surface">
+      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
         {q.isPending ? (
-          <LoadingRows />
+          <LoadingRows rows={4} />
         ) : q.isError ? (
           <ErrorState message="Your tickets could not be loaded." onRetry={() => void q.refetch()} />
         ) : items.length === 0 ? (
-          <EmptyState title="No tickets yet">Create a ticket and our team will respond within our service targets.</EmptyState>
+          <EmptyState
+            title="No tickets yet"
+            icon={MessageSquarePlus}
+            action={
+              <Button variant="primary" size="sm" asChild>
+                <Link to="/portal/new">Create your first ticket</Link>
+              </Button>
+            }
+          >
+            Create a ticket and our team will respond within our service targets.
+          </EmptyState>
         ) : (
           <>
             <ul aria-label="Your tickets">
@@ -77,7 +98,7 @@ export function PortalList() {
               ))}
             </ul>
             {q.hasNextPage ? (
-              <div className="p-3 text-center">
+              <div className="border-t border-line p-3 text-center">
                 <Button size="sm" onClick={() => void q.fetchNextPage()} disabled={q.isFetchingNextPage}>
                   Load more tickets
                 </Button>
@@ -86,18 +107,39 @@ export function PortalList() {
           </>
         )}
       </div>
+      <p className="mt-4 flex items-center gap-1.5 text-meta text-ink-3">
+        <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+        Our team works Monday–Friday, 09:30–18:30 IST, except holidays.
+      </p>
     </section>
   );
 }
 
 const Row = ({ t }: { t: PublicTicketSummary }) => (
-  <Link to={`/portal/tickets/${t.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line px-4 py-3 last:border-b-0 hover:bg-canvas">
-    <span className="min-w-0 flex-1 truncate font-semibold">{t.subject}</span>
-    {t.parentTicketId ? <Badge tone="neutral">Follow-up</Badge> : null}
-    <Badge tone={STATUS_TONE[t.status]}>{statusLabel[t.status]}</Badge>
-    <time dateTime={t.createdAt} className="text-xs text-ink-3">
-      {formatIst(t.createdAt)}
-    </time>
+  <Link to={`/portal/tickets/${t.id}`} className="group flex items-center gap-3 border-b border-line px-4 py-3.5 transition-colors duration-150 last:border-b-0 hover:bg-surface-2 sm:px-5">
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-ui font-medium text-ink">{t.subject}</p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <CustomerStatus status={t.status} />
+        {t.parentTicketId ? (
+          <Badge tone="neutral">
+            <Link2 aria-hidden="true" />
+            Follow-up
+          </Badge>
+        ) : null}
+        <time dateTime={t.createdAt} className="text-meta tabular-nums text-ink-3">
+          Opened {formatIst(t.createdAt)}
+        </time>
+      </div>
+    </div>
+    <ChevronRight className="h-4 w-4 shrink-0 text-ink-3 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
+  </Link>
+);
+
+const BackLink = () => (
+  <Link to="/portal" className="inline-flex items-center gap-1.5 rounded-md text-body font-medium text-ink-2 transition-colors hover:text-ink">
+    <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+    All tickets
   </Link>
 );
 
@@ -126,12 +168,16 @@ export function PortalNew() {
   };
   return (
     <section aria-labelledby="new-title" className="mx-auto max-w-xl">
-      <h1 id="new-title" className="mb-3 text-lg font-semibold">
+      <BackLink />
+      <h1 id="new-title" className="mt-4 text-display font-semibold tracking-[-0.02em]">
         New ticket
       </h1>
-      <form onSubmit={submit} className="space-y-3 rounded-lg border border-line bg-surface p-4">
-        <Field label="Subject">{(p) => <Input {...p} required maxLength={200} value={subject} onChange={(e) => setSubject(e.target.value)} />}</Field>
-        <Field label="What do you need help with?">{(p) => <Textarea {...p} required maxLength={10_000} value={body} onChange={(e) => setBody(e.target.value)} />}</Field>
+      <p className="mb-5 mt-1 text-body text-ink-2">Tell us what is going on. The more detail you share, the faster we can help.</p>
+      <form onSubmit={submit} className="space-y-4 rounded-xl border border-line bg-surface p-5 shadow-sm sm:p-6">
+        <Field label="Subject">{(p) => <Input {...p} required maxLength={200} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="For example: Invoice shows the wrong address" />}</Field>
+        <Field label="What do you need help with?">
+          {(p) => <Textarea {...p} required maxLength={10_000} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-36" placeholder="Describe the problem, what you expected, and any steps to reproduce it." />}
+        </Field>
         <Field label="How urgent is this for you?" hint="Our team confirms the final priority and its service targets.">
           {(p) => (
             <Select {...p} value={pref} onChange={(e) => setPref(e.target.value as Priority | '')}>
@@ -143,11 +189,11 @@ export function PortalNew() {
           )}
         </Field>
         {error ? (
-          <p role="alert" className="text-[13px] font-medium text-danger-ink">
+          <Notice tone="bad" role="alert">
             {error}
-          </p>
+          </Notice>
         ) : null}
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end">
           <Button asChild>
             <Link to="/portal">Cancel</Link>
           </Button>
@@ -178,39 +224,52 @@ export function PortalTicket() {
     },
   });
 
-  if (q.isPending) return <LoadingRows rows={4} />;
+  if (q.isPending)
+    return (
+      <div className="overflow-hidden rounded-xl border border-line bg-surface">
+        <LoadingRows rows={3} />
+      </div>
+    );
   if (q.isError || !t) {
     const missing = q.error instanceof ApiError && q.error.status === 404;
-    return <ErrorState message={missing ? 'We could not find that ticket in your account.' : 'This ticket could not be loaded.'} onRetry={missing ? undefined : () => void q.refetch()} />;
+    return (
+      <div className="space-y-4">
+        <BackLink />
+        <div className="rounded-xl border border-line bg-surface">
+          <ErrorState message={missing ? 'We could not find that ticket in your account.' : 'This ticket could not be loaded.'} onRetry={missing ? undefined : () => void q.refetch()} />
+        </div>
+      </div>
+    );
   }
   return (
-    <section aria-labelledby="pt-title" ref={scroller} className="space-y-4">
-      <Link to="/portal" className="text-[13px] font-medium text-brand-ink underline">
-        ← All tickets
-      </Link>
+    <section aria-labelledby="pt-title" ref={scroller} className="space-y-5">
+      <BackLink />
       {linkedFrom ? (
-        <p role="status" className="rounded-md border border-brand/30 bg-brand-soft p-3 text-[13px] text-brand-ink">
-          Your earlier ticket was no longer open for replies, so we created this new linked ticket with your message.{' '}
-          <Link className="font-semibold underline" to={`/portal/tickets/${linkedFrom}`}>
-            View the earlier ticket
-          </Link>
-        </p>
+        <Notice tone="brand" role="status" icon={Link2}>
+          <p>
+            Your earlier ticket was no longer open for replies, so we created this new linked ticket with your message.{' '}
+            <Link className="font-semibold underline underline-offset-2" to={`/portal/tickets/${linkedFrom}`}>
+              View the earlier ticket
+            </Link>
+          </p>
+        </Notice>
       ) : null}
-      <header className="rounded-lg border border-line bg-surface p-4">
+      <header className="rounded-xl border border-line bg-surface p-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone={STATUS_TONE[t.status]}>{statusLabel[t.status]}</Badge>
+          <CustomerStatus status={t.status} />
           {t.parentTicketId ? (
-            <Link className="text-xs font-medium text-brand-ink underline" to={`/portal/tickets/${t.parentTicketId}`}>
+            <Link className="inline-flex items-center gap-1 text-meta font-medium text-brand-ink underline underline-offset-2" to={`/portal/tickets/${t.parentTicketId}`}>
+              <Link2 className="h-3 w-3" aria-hidden="true" />
               Follow-up of an earlier ticket
             </Link>
           ) : null}
-          <span className="ml-auto text-xs text-ink-3">Opened {formatIst(t.createdAt)}</span>
+          <span className="ml-auto text-meta tabular-nums text-ink-3">Opened {formatIst(t.createdAt)}</span>
         </div>
-        <h1 id="pt-title" className="mt-1 text-lg font-semibold">
+        <h1 id="pt-title" className="mt-2 text-heading font-semibold tracking-[-0.015em]">
           {t.subject}
         </h1>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-ink-2">Download this conversation:</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3.5">
+          <span className="text-meta font-medium text-ink-3">Download conversation</span>
           <Button size="sm" asChild>
             <a href={`/api/customer/tickets/${t.id}/export?format=json`} download>
               <Download className="h-3.5 w-3.5" aria-hidden="true" />
@@ -233,6 +292,7 @@ export function PortalTicket() {
         onLoadOlder={timeline.loadOlder}
         scrollParent={{ current: document.scrollingElement as HTMLElement | null }}
         label="Conversation"
+        perspective="customer"
       />
       <PortalComposer id={t.id} status={t.status} />
     </section>
@@ -249,6 +309,14 @@ function PortalComposer({ id, status }: { id: string; status: Status }) {
 
   const heading = status === 'RESOLVED' ? 'Not resolved? Reopen this ticket' : status === 'CLOSED' ? 'Need more help? Start a follow-up' : 'Reply';
   const action = status === 'RESOLVED' ? 'Reopen ticket' : status === 'CLOSED' ? 'Create follow-up ticket' : 'Send reply';
+  const explain =
+    status === 'RESOLVED'
+      ? 'Reopening sends your message to the team on this same ticket.'
+      : status === 'CLOSED'
+        ? 'This ticket is closed, so your message starts a new ticket linked to this one.'
+        : status === 'WAITING'
+          ? 'Our team is waiting for your reply — answering resumes work on your ticket.'
+          : null;
   const submit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -267,21 +335,21 @@ function PortalComposer({ id, status }: { id: string; status: Status }) {
     );
   };
   return (
-    <form onSubmit={submit} className="space-y-2 rounded-lg border border-line-strong bg-surface p-3">
-      <Field label={heading}>{(p) => <Textarea {...p} required maxLength={10_000} value={body} onChange={(e) => setBody(e.target.value)} />}</Field>
+    <form onSubmit={submit} className="space-y-3 rounded-xl border border-line bg-surface p-4 shadow-sm focus-within:shadow-[0_0_0_3px_rgb(15_118_110/0.12)] sm:p-5">
+      <Field label={heading} hint={explain ?? undefined}>
+        {(p) => <Textarea {...p} required maxLength={10_000} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write your message…" />}
+      </Field>
       {error ? (
-        <p role="alert" className="text-xs font-medium text-danger-ink">
+        <Notice tone="bad" role="alert">
           {error}
-        </p>
+        </Notice>
       ) : null}
       <div className="flex justify-end">
         <Button type="submit" variant="primary" disabled={mut.isPending || !body.trim()}>
-          {kind === 'reopen' ? <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+          {kind === 'reopen' ? <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> : <Send className="h-3.5 w-3.5" aria-hidden="true" />}
           {mut.isPending ? 'Sending…' : action}
         </Button>
       </div>
     </form>
   );
 }
-
-

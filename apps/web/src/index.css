@@ -1,40 +1,166 @@
+@import '@fontsource-variable/inter';
 @import 'tailwindcss';
 
-/* Frontdesk design tokens. Contrast checked for WCAG AA text pairs (see docs/UI_ENGINEERING.md). */
+/*
+ * Frontdesk design tokens — the single source for colour, type, radius, elevation and motion.
+ * Contrast: text pairs below were checked for WCAG AA (4.5:1 body text, 3:1 UI); see docs/UI_ENGINEERING.md.
+ * Direction: warm neutral canvas, deep ink, ONE teal accent used sparingly; amber is reserved for team-only notes.
+ */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
-  --color-nav: #0f1b2d;
-  --color-nav-2: #172840;
-  --color-nav-text: #c7d2e0;
+  /* Type scale (size / line-height). Body copy is 13–14px so dense business data stays comfortably readable. */
+  --text-caption: 11px;
+  --text-caption--line-height: 16px;
+  --text-meta: 12px;
+  --text-meta--line-height: 16px;
+  --text-body: 13px;
+  --text-body--line-height: 20px;
+  --text-ui: 14px;
+  --text-ui--line-height: 20px;
+  --text-title: 15px;
+  --text-title--line-height: 22px;
+  --text-heading: 19px;
+  --text-heading--line-height: 26px;
+  --text-display: 26px;
+  --text-display--line-height: 32px;
+
+  /* Neutrals: layered surfaces on a warm canvas. ink-3 is the lightest colour allowed for text (≥ 5:1 on canvas). */
+  --color-canvas: #f5f5f2;
   --color-surface: #ffffff;
-  --color-canvas: #f4f6f9;
-  --color-line: #dbe1ea;
-  --color-line-strong: #bcc6d4;
-  --color-ink: #0f1b2d;
-  --color-ink-2: #3d4b5f;
-  --color-ink-3: #5a6b80;
+  --color-surface-2: #fafaf8;
+  --color-sunken: #efefeb;
+  --color-line: #e5e4df;
+  --color-line-strong: #d2d1ca;
+  /* Form-control boundaries: ≥ 3:1 against surface/surface-2 (WCAG 1.4.11 non-text contrast). */
+  --color-control: #878d95;
+  --color-ink: #14181f;
+  --color-ink-2: #434a55;
+  --color-ink-3: #5f6670;
 
+  /* Brand: teal. Selected states, primary actions, focus and meaningful highlights only. */
   --color-brand: #0f766e;
-  --color-brand-hover: #0b5f59;
-  --color-brand-soft: #e6f4f2;
-  --color-brand-ink: #0a4f4a;
+  --color-brand-hover: #0c625b;
+  --color-brand-soft: #e8f3f1;
+  --color-brand-ink: #0a4f49;
 
+  /* Semantic status. */
   --color-danger: #b42318;
-  --color-danger-soft: #fdecea;
+  --color-danger-soft: #fdeeec;
   --color-danger-ink: #8a1b12;
   --color-warn: #b45309;
-  --color-warn-soft: #fff4de;
+  --color-warn-soft: #fdf3e1;
   --color-warn-ink: #7a3a05;
   --color-ok: #166534;
-  --color-ok-soft: #e6f5ea;
+  --color-ok-soft: #e9f5ed;
   --color-ok-ink: #14532d;
-  --color-info-soft: #e8eefb;
+  --color-info: #1d4ed8;
+  --color-info-soft: #ebf0fc;
   --color-info-ink: #1e3a8a;
 
-  --radius-md: 6px;
+  /* Team-only notes: a dedicated amber family so a private note can never be mistaken for a public reply. */
+  --color-note: #a15c07;
+  --color-note-soft: #fff7e2;
+  --color-note-line: #e3b75a;
+  --color-note-ink: #6b3d03;
+
+  /* Geometry. */
+  --radius-sm: 5px;
+  --radius-md: 7px;
   --radius-lg: 10px;
-  --shadow-pop: 0 8px 24px rgb(15 27 45 / 0.16);
+  --radius-xl: 14px;
+
+  /* Elevation: hairline borders do most of the work; shadows stay soft. */
+  --shadow-xs: 0 1px 2px rgb(20 24 31 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(20 24 31 / 0.04), 0 2px 8px -2px rgb(20 24 31 / 0.06);
+  --shadow-pop: 0 2px 6px rgb(20 24 31 / 0.05), 0 18px 40px -12px rgb(20 24 31 / 0.22);
+
+  /* Motion: short and calm. All of it collapses under prefers-reduced-motion (below). */
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-fade-in: fd-fade-in 160ms var(--ease-out-soft);
+  --animate-fade-out: fd-fade-out 120ms ease-in;
+  --animate-pop-in: fd-pop-in 200ms var(--ease-out-soft);
+  --animate-pop-out: fd-pop-out 130ms ease-in;
+  --animate-rise-in: fd-rise-in 220ms var(--ease-out-soft);
+}
+
+@keyframes fd-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fd-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+/* transform only: positioning uses the separate CSS `translate` property (Tailwind 4), so the two compose. */
+@keyframes fd-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+@keyframes fd-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+@keyframes fd-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes fd-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/*
+ * Glass: translucent surface + backdrop blur, used ONLY for chrome that content scrolls beneath (sticky headers,
+ * top bars) and for floating layers (dialogs, toasts, the mobile drawer). Never on rows or cards.
+ */
+@utility glass {
+  background-color: rgb(255 255 255 / 0.74);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+@utility glass-strong {
+  background-color: rgb(255 255 255 / 0.9);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+@utility glass-canvas {
+  background-color: rgb(245 245 242 / 0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+/* Legible without backdrop-filter, and opaque when the user asks for less transparency. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong {
+    background-color: rgb(255 255 255 / 0.97);
+  }
+  .glass-canvas {
+    background-color: rgb(245 245 242 / 0.97);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong {
+    background-color: var(--color-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glass-canvas {
+    background-color: var(--color-canvas);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 html,
@@ -49,18 +175,25 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.45;
+  font-feature-settings:
+    'cv11' 1,
+    'calt' 1;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
-.nav-surface :focus-visible {
-  outline-color: #7ee0d4;
-}
 ::selection {
-  background: #bfe8e3;
+  background: #c5e6e1;
 }
+/* Calm, thin scrollbars inside panes. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -71,15 +204,12 @@ body {
     scroll-behavior: auto !important;
   }
 }
-@keyframes fd-pulse {
-  50% {
-    opacity: 0.5;
-  }
-}
+
 .fd-skeleton {
-  background: var(--color-line);
   border-radius: 4px;
-  animation: fd-pulse 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--color-sunken) 0%, #f8f8f5 40%, var(--color-sunken) 80%);
+  background-size: 200% 100%;
+  animation: fd-shimmer 1.6s linear infinite;
 }
 .sr-only-live {
   position: absolute;
@@ -88,4 +218,21 @@ body {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Login backdrop: a faint drafting grid with one restrained teal wash at the top. */
+.fd-login-backdrop {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(56rem 26rem at 50% -8rem, rgb(15 118 110 / 0.11), transparent 70%),
+    linear-gradient(to right, rgb(20 24 31 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(20 24 31 / 0.04) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    32px 32px,
+    32px 32px;
+  background-position:
+    0 0,
+    -1px -1px,
+    -1px -1px;
 }

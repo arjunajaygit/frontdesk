@@ -1,6 +1,27 @@
-import { History, ShieldCheck } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import {
+  AlertTriangle,
+  Archive,
+  ArrowUpDown,
+  CheckCheck,
+  CheckCircle2,
+  Circle,
+  CirclePlus,
+  Hand,
+  History,
+  Hourglass,
+  Link2,
+  Lock,
+  MessageSquareText,
+  PauseCircle,
+  PlayCircle,
+  RotateCcw,
+  ShieldCheck,
+  UserRoundCog,
+  XCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { formatIst, formatIstFull, formatWorking, priorityLabel, statusLabel } from '@/lib/format';
 import type { AuditEvent, Priority, Status } from '@/lib/types';
 
@@ -63,6 +84,47 @@ export function describeAudit(e: AuditEvent): string {
   }
 }
 
+type Tone = 'neutral' | 'brand' | 'ok' | 'warn' | 'bad' | 'info' | 'note';
+const EVENT: Record<string, { icon: LucideIcon; tone: Tone; label: string }> = {
+  TICKET_CREATED: { icon: CirclePlus, tone: 'brand', label: 'Ticket created' },
+  TICKET_CLAIMED: { icon: Hand, tone: 'brand', label: 'Claimed' },
+  TICKET_REASSIGNED: { icon: UserRoundCog, tone: 'neutral', label: 'Reassigned' },
+  MESSAGE_PUBLISHED: { icon: MessageSquareText, tone: 'neutral', label: 'Message published' },
+  INTERNAL_NOTE_ADDED: { icon: Lock, tone: 'note', label: 'Internal note' },
+  PRIORITY_CHANGED: { icon: ArrowUpDown, tone: 'info', label: 'Priority changed' },
+  SLA_PAUSED: { icon: PauseCircle, tone: 'warn', label: 'SLA paused' },
+  SLA_RESUMED: { icon: PlayCircle, tone: 'brand', label: 'SLA resumed' },
+  SLA_BREACHED: { icon: AlertTriangle, tone: 'bad', label: 'SLA breached' },
+  SLA_COMPLETED: { icon: CheckCircle2, tone: 'ok', label: 'SLA completed' },
+  SLA_CANCELLED: { icon: XCircle, tone: 'neutral', label: 'SLA cancelled' },
+  TICKET_WAITING: { icon: Hourglass, tone: 'warn', label: 'Waiting on customer' },
+  TICKET_RESUMED: { icon: PlayCircle, tone: 'brand', label: 'Back in progress' },
+  TICKET_RESOLVED: { icon: CheckCheck, tone: 'ok', label: 'Resolved' },
+  TICKET_CLOSED: { icon: Archive, tone: 'neutral', label: 'Closed' },
+  TICKET_REOPENED: { icon: RotateCcw, tone: 'info', label: 'Reopened' },
+  LINKED_TICKET_CREATED: { icon: Link2, tone: 'neutral', label: 'Linked ticket created' },
+};
+const eventMeta = (action: string) => EVENT[action] ?? { icon: Circle, tone: 'neutral' as Tone, label: action.replace(/_/g, ' ').toLowerCase() };
+const DOT: Record<Tone, string> = {
+  neutral: 'border-line-strong bg-surface text-ink-3',
+  brand: 'border-brand/25 bg-brand-soft text-brand',
+  ok: 'border-ok/25 bg-ok-soft text-ok',
+  warn: 'border-warn/30 bg-warn-soft text-warn',
+  bad: 'border-danger/30 bg-danger-soft text-danger',
+  info: 'border-info/25 bg-info-soft text-info',
+  note: 'border-note-line bg-note-soft text-note',
+};
+
+/** Vertical rail with one marker per event. The connecting line is decorative. */
+function EventMarker({ action, small }: { action: string; small?: boolean }) {
+  const { icon: Icon, tone } = eventMeta(action);
+  return (
+    <span className={cn('relative z-[1] grid shrink-0 place-items-center rounded-full border', DOT[tone], small ? 'h-6 w-6' : 'h-7 w-7')}>
+      <Icon className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} aria-hidden="true" />
+    </span>
+  );
+}
+
 const SLA_ACTIONS = new Set(['TICKET_CREATED', 'PRIORITY_CHANGED', 'SLA_PAUSED', 'SLA_RESUMED', 'SLA_BREACHED', 'SLA_COMPLETED', 'SLA_CANCELLED', 'MESSAGE_PUBLISHED', 'TICKET_RESOLVED', 'TICKET_CLOSED', 'TICKET_REOPENED']);
 
 export function SlaStory({ events, complete }: { events: AuditEvent[]; complete: boolean }) {
@@ -70,17 +132,22 @@ export function SlaStory({ events, complete }: { events: AuditEvent[]; complete:
   const story = events.filter((e) => SLA_ACTIONS.has(e.action) && !(e.action === 'MESSAGE_PUBLISHED' && e.details.messageKind === 'INTAKE'));
   if (!story.length) return null;
   return (
-    <section aria-labelledby="sla-story" className="rounded-lg border border-line bg-surface p-3">
-      <h3 id="sla-story" className="flex items-center gap-2 text-sm font-semibold">
-        <History className="h-4 w-4 text-ink-3" aria-hidden="true" />
+    <section aria-labelledby="sla-story" className={cn('rounded-xl border p-4', breached ? 'border-danger/20 bg-danger-soft/40' : 'border-line bg-surface-2')}>
+      <h3 id="sla-story" className="flex items-center gap-2 text-ui font-semibold">
+        {breached ? <AlertTriangle className="h-4 w-4 text-danger" aria-hidden="true" /> : <History className="h-4 w-4 text-ink-3" aria-hidden="true" />}
         {breached ? 'Why was this ticket late?' : 'SLA history'}
       </h3>
-      <p className="mt-1 text-xs text-ink-3">Reconstructed from immutable audit events. Historical breaches stay on record even after the current status recovers.{complete ? '' : ' Showing loaded events; load more below for the full trail.'}</p>
-      <ol className="mt-2 space-y-2 border-l border-line pl-3">
+      <p className="mt-1 text-meta text-ink-3">Reconstructed from immutable audit events. Historical breaches stay on record even after the current status recovers.{complete ? '' : ' Showing loaded events; load more below for the full trail.'}</p>
+      <ol className="relative mt-4 space-y-3 before:absolute before:bottom-3 before:left-3 before:top-3 before:w-px before:bg-line-strong before:content-['']">
         {story.map((e) => (
-          <li key={e.id} className="text-[13px]">
-            <span className="text-xs text-ink-3">{formatIst(e.createdAt)} · </span>
-            {describeAudit(e)}
+          <li key={e.id} className="flex gap-3 text-body">
+            <EventMarker action={e.action} small />
+            <p className="min-w-0 pt-0.5 text-ink">
+              <time dateTime={e.createdAt} className="mr-1.5 text-meta tabular-nums text-ink-3">
+                {formatIst(e.createdAt)}
+              </time>
+              {describeAudit(e)}
+            </p>
           </li>
         ))}
       </ol>
@@ -90,18 +157,22 @@ export function SlaStory({ events, complete }: { events: AuditEvent[]; complete:
 
 export function AuditList({ events, hasMore, loadingMore, onLoadMore }: { events: AuditEvent[]; hasMore: boolean; loadingMore: boolean; onLoadMore: () => void }) {
   return (
-    <div className="space-y-3">
-      <ol className="space-y-2" aria-label="Audit events">
+    <div className="space-y-4">
+      <h3 className="text-caption font-medium text-ink-3">Audit trail</h3>
+      <ol className="relative space-y-1 before:absolute before:bottom-4 before:left-[13.5px] before:top-4 before:w-px before:bg-line before:content-['']" aria-label="Audit events">
         {events.map((e) => (
-          <li key={e.id} className="rounded-lg border border-line bg-surface p-3 text-[13px]">
-            <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-ink-3">
-              <Badge tone="neutral">{e.action.replace(/_/g, ' ').toLowerCase()}</Badge>
-              <span className="font-medium text-ink-2">{ACTOR[e.actorType] ?? e.actorType}</span>
-              <time dateTime={e.createdAt} className="ml-auto" title={`Recorded ${new Date(e.createdAt).toISOString()} (UTC)`}>
-                recorded {formatIstFull(e.createdAt)}
-              </time>
+          <li key={e.id} className="flex gap-3 rounded-lg py-2 text-body">
+            <EventMarker action={e.action} />
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-meta">
+                <span className="font-semibold text-ink">{eventMeta(e.action).label}</span>
+                <span className="text-ink-3">by {ACTOR[e.actorType] ?? e.actorType}</span>
+                <time dateTime={e.createdAt} className="ml-auto tabular-nums text-ink-3" title={`Recorded ${new Date(e.createdAt).toISOString()} (UTC)`}>
+                  recorded {formatIstFull(e.createdAt)}
+                </time>
+              </div>
+              <p className="mt-0.5 text-ink-2">{describeAudit(e)}</p>
             </div>
-            <p className="text-ink">{describeAudit(e)}</p>
           </li>
         ))}
       </ol>
@@ -110,8 +181,8 @@ export function AuditList({ events, hasMore, loadingMore, onLoadMore }: { events
           {loadingMore ? 'Loading…' : 'Load more events'}
         </Button>
       ) : (
-        <p className="flex items-center gap-1.5 text-xs text-ink-3">
-          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> End of audit trail. Events are append-only; times are recording times in IST.
+        <p className="flex items-center gap-1.5 border-t border-line pt-3 text-meta text-ink-3">
+          <ShieldCheck className="h-3.5 w-3.5 text-ok" aria-hidden="true" /> End of audit trail. Events are append-only; times are recording times in IST.
         </p>
       )}
     </div>

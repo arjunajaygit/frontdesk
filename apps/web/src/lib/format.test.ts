@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatIst, formatWorking, ticketRef } from './format';
+import { formatIst, formatIstShort, formatWorking, ticketRef } from './format';
 
 describe('formatting', () => {
   it('renders instants in IST with the zone labelled', () => {
     expect(formatIst('2026-11-23T04:00:00.000Z')).toBe('Mon, 23 Nov, 09:30 IST');
     expect(formatIst(null)).toBe('—');
+    expect(formatIstShort('2026-11-23T04:00:00.000Z')).toBe('23 Nov, 09:30'); // dense rows; IST exposed via title/sr text
   });
   it('formats server-provided working time using the 9-hour working day', () => {
     expect(formatWorking(0)).toBe('0m');
