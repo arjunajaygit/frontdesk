@@ -26,7 +26,7 @@ More scenarios: [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md).
 - [`apps/api/src/tickets/ticket-command.service.ts`](apps/api/src/tickets/ticket-command.service.ts): how every change runs (idempotency reservation → lock the ticket → fresh database time → lock its clocks → apply the domain rule → write the audit → store the outcome), all in one transaction
 - [`docs/DOMAIN_CONTRACT.md`](docs/DOMAIN_CONTRACT.md): where the brief was ambiguous, the interpretation I chose, and the exact edge cases
 
-**A note on scope:** I went well past the suggested 8 hours. That was a deliberate choice, and I explain it in [SHORT_NOTE.md](SHORT_NOTE.md). The core of the submission is `apps/`, `packages/contracts/`, `prisma/` and the calendar kernel `src/calendar.mjs`. Most of `infrastructure/` and `docs/` is extra and not needed to judge it.
+**A note on scope:** I went well past the suggested 8 hours. That was a deliberate choice, and I explain it in [SHORT_NOTE.md](SHORT_NOTE.md). The core of the submission is `apps/`, `packages/contracts/`, `prisma/` and the calendar kernel `src/calendar.mjs`. Most of `infrastructure/` and `docs/` is extra and.
 
 
 ## Contents
