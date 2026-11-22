@@ -59,7 +59,9 @@ export function TicketList({
           </Select>
         </div>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      {/* relative: the containing block for absolutely positioned descendants (e.g. sr-only labels), so they are clipped
+          and scrolled with the list instead of extending the whole page (empty page scroll). */}
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
         {q.isPending ? (
           <LoadingRows />
         ) : q.isError ? (

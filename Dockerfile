@@ -89,6 +89,9 @@ COPY --from=build /app/apps/api/dist apps/api/dist
 COPY --from=build /app/apps/web/dist apps/web/dist
 # The preserved calendar kernel is loaded at runtime from <repo root>/src/calendar.mjs (see calendar-kernel.ts).
 COPY src/calendar.mjs src/calendar.mjs
+# Supabase's public root CA (fingerprint pinned by tests/unit/supabase-ca.test.ts): lets the runtime VERIFY the database
+# pooler certificate (DATABASE_URL ...&sslcert=/app/certs/supabase-prod-ca-2021.crt&sslaccept=strict). Public, not a secret.
+COPY infrastructure/deploy/supabase/supabase-prod-ca-2021.crt /app/certs/supabase-prod-ca-2021.crt
 # The runtime never invokes npm/npx/corepack/yarn: remove the package managers bundled with the base image
 # (Trivy flagged HIGH/CRITICAL advisories in npm's own bundled dependencies, which the app never executes).
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
