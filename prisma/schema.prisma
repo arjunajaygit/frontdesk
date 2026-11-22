@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AGENT
+  LEAD
+  CUSTOMER
+  ADMIN
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  URGENT
+  MEDIUM
+  LOW
+}
+
+enum ActorType {
+  AGENT
+  LEAD
+  ADMIN
+  CUSTOMER
+  SYSTEM
+}
+
+enum AuditTarget {
+  TICKET
+  SWEEP
+}
+
+enum ClockKind {
+  RESPONSE
+  RESOLUTION
+}
+
+enum ClockState {
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum MessageKind {
+  INTAKE
+  REPLY
+  REQUEST
+  NOTE
+}
+
+enum SweepState {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum CloseReason {
+  AUTO_CLOSED_NO_REPLY
+  RESOLUTION_WINDOW_EXPIRED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  displayName        String
+  passwordHash       String
+  role               Role
+  customers          Ticket[]            @relation("customer")
+  assignments        Ticket[]            @relation("assignee")
+  messages           Message[]
+  audits             AuditEvent[]
+  sessions           Session[]
+  sweeps             SweepInvocation[]
+  idempotencyRecords IdempotencyRecord[]
+}
+
+model Ticket {
+  id                String       @id @default(uuid())
+  subject           String
+  customerId        String
+  customer          User         @relation("customer", fields: [customerId], references: [id], onDelete: Restrict)
+  assigneeId        String?
+  assignee          User?        @relation("assignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  status            Status       @default(OPEN)
+  priority          Priority
+  requestedPriority Priority?
+  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime     @default(now()) @db.Timestamptz(3)
+  parentTicketId    String?
+  parentTicket      Ticket?      @relation("ticketLineage", fields: [parentTicketId], references: [id], onDelete: Restrict)
+  children          Ticket[]     @relation("ticketLineage")
+  version           Int          @default(0)
+  resolutionCycle   Int          @default(0)
+  closedAt          DateTime?    @db.Timestamptz(3)
+  closeReason       CloseReason?
+  reopenUntil       DateTime?    @db.Timestamptz(3)
+  waitingCloseDueAt DateTime?    @db.Timestamptz(3)
+  resolvedAt        DateTime?    @db.Timestamptz(3)
+  waitingSince      DateTime?    @db.Timestamptz(3)
+  messages          Message[]
+  audits            AuditEvent[]
+  clocks            SlaClock[]
+
+  @@index([assigneeId, status])
+  @@index([status, waitingSince])
+  @@index([status, waitingCloseDueAt])
+  @@index([status, reopenUntil])
+  @@index([customerId, createdAt, id])
+}
+
+model SlaClock {
+  id              String     @id @default(uuid())
+  ticketId        String
+  ticket          Ticket     @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  cycle           Int
+  kind            ClockKind
+  state           ClockState
+  cycleStartedAt  DateTime   @db.Timestamptz(3)
+  budgetMs        BigInt
+  consumedMs      BigInt     @default(0)
+  currentLate     Boolean    @default(false)
+  breachSequence  Int        @default(0)
+  policyRevision  Int        @default(0)
+  runningSince    DateTime?  @db.Timestamptz(3)
+  deadlineAt      DateTime?  @db.Timestamptz(3)
+  completedAt     DateTime?  @db.Timestamptz(3)
+  cancelledAt     DateTime?  @db.Timestamptz(3)
+  firstBreachedAt DateTime?  @db.Timestamptz(3)
+
+  @@unique([ticketId, cycle, kind])
+  @@index([state, deadlineAt])
+}
+
+model Message {
+  id         String      @id @default(uuid())
+  ticketId   String
+  ticket     Ticket      @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  authorId   String
+  author     User        @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body       String
+  visibility Visibility
+  kind       MessageKind
+  createdAt  DateTime    @default(now()) @db.Timestamptz(3)
+
+  @@index([ticketId, visibility, createdAt, id])
+  @@index([ticketId, createdAt, id])
+}
+
+model AuditEvent {
+  id            String           @id @default(uuid())
+  target        AuditTarget
+  ticketId      String?
+  ticket        Ticket?          @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  sweepId       String?
+  sweep         SweepInvocation? @relation(fields: [sweepId], references: [id], onDelete: Restrict)
+  correlationId String
+  reasonCode    String?
+  actorType     ActorType
+  actorId       String?
+  actor         User?            @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action        String
+  details       Json
+  eventKey      String?          @unique
+  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
+
+  @@index([ticketId, createdAt, id])
+  @@index([sweepId, createdAt, id])
+  @@index([correlationId])
+  @@map("audit_logs")
+}
+
+model Holiday {
+  day  DateTime @id @db.Date
+  name String
+}
+
+model Session {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  tokens    RefreshToken[]
+  createdAt DateTime       @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime       @db.Timestamptz(3)
+  revokedAt DateTime?      @db.Timestamptz(3)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  sessionId String
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  tokenHash String    @unique
+  issuedAt  DateTime  @db.Timestamptz(3)
+  usedAt    DateTime? @db.Timestamptz(3)
+
+  @@index([sessionId])
+}
+
+model SweepInvocation {
+  id               String       @id @default(uuid())
+  actorId          String?
+  actor            User?        @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  actorType        ActorType
+  key              String       @unique
+  requestHash      String
+  state            SweepState
+  startedAt        DateTime     @db.Timestamptz(3)
+  leaseUntil       DateTime     @db.Timestamptz(3)
+  leaseToken       String
+  processed        Int          @default(0)
+  autoClosed       Int          @default(0)
+  expired          Int          @default(0)
+  breachesRecorded Int          @default(0)
+  failed           Int          @default(0)
+  responseStatus   Int?
+  finishedAt       DateTime?    @db.Timestamptz(3)
+  result           Json?
+  audits           AuditEvent[]
+
+  @@index([state, leaseUntil, id])
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid())
+  actorId        String
+  actor          User     @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  operation      String
+  key            String
+  requestHash    String
+  response       Json?
+  responseStatus Int?
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([actorId, operation, key])
+  @@index([createdAt])
+}

@@ -1,0 +1,91 @@
+name: Security
+
+# Secret scanning, static analysis, dependency audit, SBOM and container scan. No secrets used; fork-safe
+# (pull_request only). Findings fail the job; waivers live in docs/DEVSECOPS.md with owner and expiry.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * 1' # weekly: new advisories can appear without code changes
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  secrets:
+    name: Gitleaks (full history)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { fetch-depth: 0, persist-credentials: false }
+      - name: Scan history with redaction (secret values are never printed)
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git --config .gitleaks.toml --redact --no-banner --exit-code 1 .
+
+  sast:
+    name: Semgrep (project rules + OWASP/TypeScript/Node/JWT/React packs)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - name: Semgrep (metrics off; findings fail the job)
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep@sha256:67518c174185a2043fdbed16c70631b79209499b3671178e7194379b48295a0d \
+            semgrep scan --metrics=off --error --config .semgrep/frontdesk.yml --config p/typescript --config p/nodejs \
+            --config p/owasp-top-ten --config p/jwt --config p/react --exclude node_modules --exclude dist --exclude tests \
+            apps packages prisma scripts
+
+  dependencies:
+    name: npm audit (production) and CycloneDX SBOM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - name: Fail on high/critical advisories that are not documented waivers
+        run: node scripts/audit-gate.mjs
+      - name: Generate CycloneDX SBOM (runtime dependencies)
+        run: npx --yes @cyclonedx/cyclonedx-npm@7.0.1 --omit dev --omit peer --spec-version 1.6 --of JSON --output-file sbom.cdx.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with: { name: sbom-cyclonedx, path: sbom.cdx.json, retention-days: 30 }
+
+  image:
+    name: Trivy (production image - OS packages, npm packages, misconfig, secrets)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      # Rebuilt on every run (incl. the weekly schedule) on a cache-less runner: `apt-get upgrade` in the base stage
+      # picks up newly published OS fixes, and Trivy downloads a fresh vulnerability DB. Scanning an old immutable
+      # artifact alone would never remediate anything.
+      - run: docker build --pull --target runtime --build-arg GIT_SHA=${{ github.sha }} -t frontdesk-app:scan .
+      - name: Scan the exact built image (HIGH/CRITICAL fail unless fixed-version is unavailable)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+            image --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress frontdesk-app:scan
+      - name: Container CycloneDX SBOM of the exact scanned image (OS + npm components)
+        if: always()
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out" aquasec/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+            image --format cyclonedx --output /out/sbom-image.cdx.json --no-progress frontdesk-app:scan
+          docker image inspect frontdesk-app:scan --format '{{.Id}}' > image-id.txt
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom-image-cyclonedx
+          path: |
+            sbom-image.cdx.json
+            image-id.txt
+          retention-days: 30

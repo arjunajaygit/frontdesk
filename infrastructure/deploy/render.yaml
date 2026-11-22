@@ -1,0 +1,24 @@
+# Render Blueprint DRAFT for the single same-origin container. NOT validated against Render and NOT applied:
+# validate and adjust in M8 with explicit user approval (creates PAID resources). The database is provisioned
+# separately so the owner/runtime role model can be created with infrastructure/deploy/preflight.sql.
+services:
+  - type: web
+    name: frontdesk
+    runtime: docker
+    dockerfilePath: ./Dockerfile # last stage = runtime (non-root, no Prisma CLI)
+    dockerContext: .
+    plan: starter # always-on: an unattended in-process scheduler requires an instance that never sleeps
+    region: singapore # choose the region of the database (private network, low latency) and IST users
+    healthCheckPath: /api/readyz # readiness enforces the restricted DB role; failing deploys never receive traffic
+    autoDeploy: false # deploy only a reviewed, tested commit (DEVSECOPS: no ungated auto-deploy)
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: PORT, value: '3000' }
+      - { key: TRUST_PROXY_HOPS, value: '1' } # Render terminates TLS at ONE proxy hop; do not trust more
+      - { key: PUBLIC_ORIGIN, sync: false } # exact https origin, e.g. https://frontdesk-xxxx.onrender.com
+      - { key: DATABASE_URL, sync: false } # frontdesk_app (restricted) URL ONLY, with sslmode=require
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: CSRF_SIGNING_KEY, generateValue: true } # independent value from JWT_SECRET
+      - { key: SWEEP_SCHEDULER_ENABLED, value: 'true' }
+      - { key: SWEEP_INTERVAL_MS, value: '60000' }
+      - { key: LOG_LEVEL, value: info }

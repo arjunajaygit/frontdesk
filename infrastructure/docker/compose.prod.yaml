@@ -1,0 +1,156 @@
+# Production-like stack: ONE same-origin app container (API + compiled SPA) + PostgreSQL.
+#   node scripts/gen-env-prod.mjs && docker compose -p frontdesk-prod --env-file .env.production.local -f infrastructure/docker/compose.prod.yaml up -d --build --wait
+# Release procedure: build -> `migrate` job (owner role) completes -> `app` starts (restricted role) -> readiness.
+# Nothing here seeds data or resets a database; seeding is the explicit `ops` profile only.
+name: frontdesk-prod
+services:
+  postgres:
+    image: postgres:16.14-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: frontdesk_bootstrap # initdb superuser; used by neither the app nor migrations
+      POSTGRES_PASSWORD: ${POSTGRES_BOOTSTRAP_PASSWORD:?run node scripts/gen-env-prod.mjs}
+      POSTGRES_DB: postgres
+      FRONTDESK_OWNER_PASSWORD: ${FRONTDESK_OWNER_PASSWORD:?}
+      FRONTDESK_APP_PASSWORD: ${FRONTDESK_APP_PASSWORD:?}
+    # No `ports:` — the database is reachable only on the private compose network.
+    volumes:
+      - frontdesk_prod_pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    networks: [private]
+    shm_size: 128mb
+    mem_limit: 512m
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U frontdesk_bootstrap -d frontdesk']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # One-shot controlled migration: the ONLY place the owner credentials are used. Never part of app startup.
+  migrate:
+    build: { context: ../.., target: migrate }
+    image: frontdesk-migrate:local
+    restart: 'no'
+    environment:
+      DATABASE_URL: postgresql://frontdesk_owner:${FRONTDESK_OWNER_PASSWORD}@postgres:5432/frontdesk
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [private]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+
+  app:
+    build:
+      context: ../..
+      target: runtime
+      args: { GIT_SHA: '${GIT_SHA:-unknown}' } # exact commit -> OCI label + startup log (not a secret)
+    image: frontdesk-app:local
+    restart: unless-stopped
+    init: true # PID 1 reaps and forwards SIGTERM; the app drains via Nest shutdown hooks
+    stop_grace_period: 30s
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?}
+      ALLOW_LOOPBACK_HTTP_IN_PRODUCTION: ${ALLOW_LOOPBACK_HTTP_IN_PRODUCTION:-false}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-0}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      JWT_SECRET: ${JWT_SECRET:?}
+      CSRF_SIGNING_KEY: ${CSRF_SIGNING_KEY:?}
+      # Restricted runtime role only. The app verifies this at startup and refuses to run as an owner.
+      DATABASE_URL: postgresql://frontdesk_app:${FRONTDESK_APP_PASSWORD}@postgres:5432/frontdesk
+      SWEEP_SCHEDULER_ENABLED: 'true'
+      SWEEP_INTERVAL_MS: ${SWEEP_INTERVAL_MS:-60000}
+      # Internal metrics listener: reachable only on the monitoring network (never published), bearer-token protected.
+      METRICS_PORT: '9464'
+      METRICS_HOST: 0.0.0.0
+      METRICS_TOKEN: ${METRICS_TOKEN:?run node scripts/gen-env-prod.mjs (adds missing keys)}
+    ports:
+      - '127.0.0.1:${APP_PORT:-8080}:3000' # publish behind your TLS terminator; loopback only by default
+    depends_on:
+      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    networks: [private, monitoring]
+    read_only: true
+    tmpfs: ['/tmp:size=16m,mode=1777']
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 512m
+    pids_limit: 256
+
+  # Explicit demo/ops seeding (synthetic data). Run on purpose: docker compose --profile ops run --rm seed
+  seed:
+    profiles: [ops]
+    build: { context: ../.., target: tools }
+    image: frontdesk-tools:local
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://frontdesk_owner:${FRONTDESK_OWNER_PASSWORD}@postgres:5432/frontdesk
+      SEED_CREDENTIALS: write
+      SEED_TARGET_LABEL: prod-compose # credentials.prod-compose.json — never collides with the dev database's file
+      NODE_ENV: development # the seed refuses NODE_ENV=production without ALLOW_DEMO_SEED=true
+    volumes:
+      - ../../.local:/app/.local # credentials.prod-compose.json is written here (0600, git-ignored)
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [private]
+
+  # ---- OPTIONAL monitoring profile: docker compose ... --profile monitoring up -d -----------------------------
+  # Not required by the application or the reviewer deployment. Images pinned by multi-arch index digest (arm64 OK).
+  prometheus:
+    profiles: [monitoring]
+    image: prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
+    command: [
+        '--config.file=/etc/prometheus/prometheus.yml',
+        '--storage.tsdb.path=/prometheus',
+        '--storage.tsdb.retention.time=7d', # lifecycle/admin APIs stay disabled (Prometheus default)
+      ]
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - frontdesk_prod_promdata:/prometheus
+    secrets: [metrics_token]
+    ports: ['127.0.0.1:${PROMETHEUS_PORT:-9091}:9090'] # loopback only
+    networks: [monitoring]
+    # Not read_only: Compose can only inject an environment-sourced secret into a writable container. It still runs
+    # as the image's non-root user with all capabilities dropped; its only writable state is the TSDB volume.
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 256m
+  grafana:
+    profiles: [monitoring]
+    image: grafana/grafana:12.1.1@sha256:a1701c2180249361737a99a01bc770db39381640e4d631825d38ff4535efa47d
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?run node scripts/gen-env-prod.mjs (adds missing keys)}
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+      GF_NEWS_NEWS_FEED_ENABLED: 'false'
+    volumes:
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - frontdesk_prod_grafanadata:/var/lib/grafana
+    ports: ['127.0.0.1:${GRAFANA_PORT:-3001}:3000'] # loopback only
+    depends_on: [prometheus]
+    networks: [monitoring]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 384m
+
+secrets:
+  metrics_token:
+    environment: METRICS_TOKEN
+
+volumes:
+  frontdesk_prod_pgdata:
+    name: frontdesk_prod_pgdata
+  frontdesk_prod_promdata:
+    name: frontdesk_prod_promdata
+  frontdesk_prod_grafanadata:
+    name: frontdesk_prod_grafanadata
+networks:
+  private:
+    name: frontdesk_prod_net
+  monitoring:
+    name: frontdesk_prod_monitoring_net

@@ -1,0 +1,52 @@
+# INITIAL operational thresholds for a single small-team instance (9 agents, ~40 tickets/day). They are starting
+# points to tune with real traffic, NOT validated SLOs.
+groups:
+  - name: frontdesk
+    rules:
+      - alert: FrontdeskDown
+        expr: up{job="frontdesk"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          {
+            summary: 'Frontdesk metrics endpoint unreachable for 2 minutes (process down or network split).',
+          }
+      - alert: FrontdeskDatabaseUnavailable
+        expr: frontdesk_db_up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          { summary: 'Restricted runtime connection cannot reach PostgreSQL for 2 minutes.' }
+      - alert: FrontdeskHighServerErrorRate
+        expr: |
+          sum(rate(frontdesk_http_requests_total{status_class="5xx"}[10m]))
+            / clamp_min(sum(rate(frontdesk_http_requests_total[10m])), 1e-9) > 0.05
+          and sum(rate(frontdesk_http_requests_total[10m])) > 0.01
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: 'More than 5% of API requests returned 5xx over 10 minutes.' }
+      - alert: FrontdeskSchedulerInactive
+        # Scheduler interval is 60 s by default; no completed sweep for 5 minutes after the first one means it stalled.
+        expr: frontdesk_sweep_last_scheduled_success_timestamp_seconds > 0 and (time() - frontdesk_sweep_last_scheduled_success_timestamp_seconds) > 300
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          {
+            summary: 'No completed SLA sweep for more than 5 minutes: auto-close/breach recording has stalled.',
+          }
+      - alert: FrontdeskSchedulerNeverRan
+        expr: frontdesk_sweep_last_scheduled_success_timestamp_seconds == 0 and (time() - frontdesk_process_start_time_seconds) > 600
+        labels: { severity: critical }
+        annotations: { summary: 'Process up 10 minutes without any completed SLA sweep.' }
+      - alert: FrontdeskPersistentSweepFailures
+        expr: sum(increase(frontdesk_sweep_invocations_total{outcome=~"failed|fenced|error"}[15m])) >= 3
+        labels: { severity: warning }
+        annotations: { summary: '3 or more failed/fenced SLA sweeps in 15 minutes.' }
+      - alert: FrontdeskSweepBacklog
+        expr: frontdesk_sweep_more_due == 1
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          {
+            summary: 'Every sweep for 15 minutes reported more due work than its budget (backlog not draining).',
+          }

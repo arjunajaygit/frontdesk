@@ -1,0 +1,206 @@
+name: CI
+
+# Mandatory quality gates. No secrets are used anywhere in this workflow, so it is safe for fork pull requests
+# (pull_request, never pull_request_target). Actions are pinned to verified commit SHAs (tag in the comment).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CI: 'true'
+  FORCE_COLOR: '0'
+
+jobs:
+  static:
+    name: Static checks (types, lint, format, contracts, Prisma)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npx eslint .
+      - run: npx prettier --check .
+      - name: OpenAPI 3.0 conformance and audit-schema drift
+        run: |
+          npx tsx -e "import SwaggerParser from '@apidevtools/swagger-parser'; SwaggerParser.validate('docs/openapi.draft.yaml').then(a => console.log('OpenAPI valid', a.openapi, Object.keys(a.paths).length, 'paths'))"
+          npx tsx scripts/gen-audit-schema.ts --check
+      - name: Prisma schema validation
+        run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://user:REPLACE_ME@localhost:5432/validate
+      - run: npm run build
+      - run: node scripts/secret-scan.mjs
+
+  unit:
+    name: Unit tests (calendar, backend, frontend)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - name: Original calendar regression tests (kernel is unchanged)
+        run: npm run test:calendar
+      - name: Release gate decision tests (H03)
+        run: npm run test:release-gate
+      - run: npm run build -w @frontdesk/contracts
+      - run: npm run test:unit
+      - run: npm run test:web
+
+  integration:
+    name: PostgreSQL integration tests and engineering proofs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      # An isolated PostgreSQL with the SAME role model as production (owner / restricted runtime / bootstrap).
+      # Test-only bootstrap credentials stay inside the test harness; the application never receives them.
+      - name: Generate random test credentials and start isolated PostgreSQL
+        run: |
+          npm run env:gen
+          npm run db:up
+      - name: Real-PostgreSQL integration suites incl. PROOF-01..05 and Codex remediation regressions
+        run: npm run test:integration
+      - name: Isolated scratch databases and roles were cleaned up
+        if: always()
+        run: |
+          set -a; . ./.env; set +a
+          left=$(docker exec -e PGPASSWORD="$POSTGRES_BOOTSTRAP_PASSWORD" frontdesk-postgres psql -h 127.0.0.1 -U frontdesk_bootstrap -d postgres -Atc "select count(*) from pg_database where datname like 'frontdesk_it_%'")
+          echo "leftover scratch databases: $left"
+          test "$left" = "0"
+      - if: always()
+        run: npm run db:down
+
+  e2e:
+    name: Playwright browser tests (privacy proof, workflows, accessibility)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          npm run env:gen
+          npm run db:up
+      - run: npm run test:e2e
+      - name: Upload sanitized Playwright report on failure (synthetic data only; no credentials)
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+      - if: always()
+        run: npm run db:down
+
+  docker:
+    name: Production image build, container smoke test, image scan, SBOM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - name: Generate production-like secrets (random, never printed) and build images
+        run: |
+          node scripts/gen-env-prod.mjs
+          mkdir -p .local && chmod 777 .local
+          docker build --target runtime --build-arg GIT_SHA=${{ github.sha }} -t frontdesk-app:local .
+          docker build --target migrate -t frontdesk-migrate:local .
+      - name: Image content and identity checks
+        run: |
+          docker image inspect frontdesk-app:local --format 'user={{.Config.User}}' | grep -q 'user=node'
+          docker run --rm --entrypoint sh frontdesk-app:local -c 'test "$(id -u)" != 0 && test -f /app/src/calendar.mjs && ! touch /app/x 2>/dev/null && test -z "$(find / -xdev -perm /6000 -type f 2>/dev/null)"'
+          docker run --rm --entrypoint node frontdesk-app:local -e "
+            const { KernelBusinessCalendar } = require('/app/apps/api/dist/domain/calendar/business-calendar.js');
+            const c = new KernelBusinessCalendar(['2026-11-23']);
+            const t = c.addWorkingMs(Date.parse('2026-11-20T18:00:00+05:30'), 7200000);
+            if (new Date(t).toISOString() !== '2026-11-24T05:30:00.000Z') { console.error('calendar kernel mismatch'); process.exit(1); }
+            console.log('calendar kernel loaded and correct inside the final container');"
+          ! docker history --no-trunc frontdesk-app:local --format '{{.CreatedBy}}' | grep -iE 'secret|password|JWT|CSRF'
+      - name: Start stack (migration job -> restricted app), seed explicitly, smoke test
+        run: |
+          C="docker compose -p frontdesk-prod --env-file .env.production.local -f infrastructure/docker/compose.prod.yaml"
+          $C up -d --wait
+          $C --profile ops run --rm --user "$(id -u):$(id -g)" seed
+          node scripts/smoke-prod.mjs --base http://localhost:8080 --creds .local/credentials.prod-compose.json
+      - name: Internal metrics listener answers with the token only (never published on the host)
+        run: |
+          docker exec frontdesk-prod-app-1 node -e "
+            const u='http://127.0.0.1:9464/metrics';
+            (async () => {
+              const anon = await fetch(u); if (anon.status !== 401) process.exit(1);
+              const r = await fetch(u, { headers: { Authorization: 'Bearer ' + process.env.METRICS_TOKEN } });
+              const t = await r.text(); if (r.status !== 200 || !t.includes('frontdesk_db_up 1')) process.exit(1);
+              console.log('metrics: 401 without token, 200 with token, db up');
+            })();"
+          ! curl -sf http://127.0.0.1:9464/metrics
+      - name: Bounded k6 smoke and 9-agent claim contention (real auth/CSRF; 409 losers expected)
+        run: |
+          K6="docker run --rm --network host --user $(id -u):$(id -g) -v $PWD:/w -w /w grafana/k6@sha256:00fdcebafbc86cb0137d429529b1caa401a02e09025f02fc74866fa6e2b004d8"
+          $K6 run -q -e SCENARIO=smoke -e BASE=http://127.0.0.1:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
+          $K6 run -q -e SCENARIO=contention -e BASE=http://127.0.0.1:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
+      - name: OWASP ZAP baseline (passive) against the isolated stack; FAIL rules block, reviewed rules documented
+        run: |
+          mkdir -p zap && chmod 777 zap && cp infrastructure/security/zap/baseline.conf zap/
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" zaproxy/zap-stable@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab \
+            zap-baseline.py -t http://127.0.0.1:8080 -c baseline.conf -r zap-baseline.html -J zap-baseline.json -I
+      - name: Upload ZAP report (synthetic data; unauthenticated scan; no credentials)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zap-baseline
+          path: zap/zap-baseline.*
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Graceful shutdown evidence (SIGTERM hook runs)
+        run: |
+          docker stop frontdesk-prod-app-1 >/dev/null
+          docker logs frontdesk-prod-app-1 2>&1 | grep -q 'shutdown: scheduler stopped'
+      - name: Dump sanitized container logs on failure
+        if: failure()
+        run: docker compose -p frontdesk-prod --env-file .env.production.local -f infrastructure/docker/compose.prod.yaml logs --no-color --tail 200 app migrate | sed -E 's#://[^/ ]+@#://***@#g'
+      - if: always()
+        run: docker compose -p frontdesk-prod --env-file .env.production.local -f infrastructure/docker/compose.prod.yaml down -v
+
+  ci-success:
+    name: Release gate (all mandatory jobs must pass)
+    needs: [static, unit, integration, e2e, docker]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every mandatory job succeeded
+        run: |
+          echo "static=${{ needs.static.result }} unit=${{ needs.unit.result }} integration=${{ needs.integration.result }} e2e=${{ needs.e2e.result }} docker=${{ needs.docker.result }}"
+          test "${{ needs.static.result }}" = "success"
+          test "${{ needs.unit.result }}" = "success"
+          test "${{ needs.integration.result }}" = "success"
+          test "${{ needs.e2e.result }}" = "success"
+          test "${{ needs.docker.result }}" = "success"

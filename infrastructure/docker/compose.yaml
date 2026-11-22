@@ -1,0 +1,35 @@
+# Dedicated Frontdesk project: run with `-p frontdesk` (see npm run db:up).
+# Only PostgreSQL is in the critical path; monitoring lives in the optional `monitoring` profile (M7).
+name: frontdesk
+services:
+  postgres:
+    image: postgres:16.14-alpine # multi-arch (arm64 native)
+    container_name: frontdesk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: frontdesk_bootstrap # initdb superuser; not used by the app or migrations
+      POSTGRES_PASSWORD: ${POSTGRES_BOOTSTRAP_PASSWORD:?run npm run env:gen}
+      POSTGRES_DB: postgres
+      FRONTDESK_OWNER_PASSWORD: ${FRONTDESK_OWNER_PASSWORD:?run npm run env:gen}
+      FRONTDESK_APP_PASSWORD: ${FRONTDESK_APP_PASSWORD:?run npm run env:gen}
+    ports:
+      - '127.0.0.1:55432:5432'
+    volumes:
+      - frontdesk_pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    networks: [frontdesk_net]
+    shm_size: 128mb
+    deploy:
+      resources:
+        limits: { memory: 512m }
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U frontdesk_bootstrap -d postgres']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  frontdesk_pgdata:
+    name: frontdesk_pgdata
+networks:
+  frontdesk_net:
+    name: frontdesk_net

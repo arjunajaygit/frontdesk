@@ -1,0 +1,6860 @@
+openapi: 3.0.3
+info:
+  title: Frontdesk V3.1 contract (unimplemented)
+  version: 3.1.0
+  description: Typed implementation contract, not a running API. DOMAIN_CONTRACT and AUTH_CONTRACT define state
+    and authorization. Validate against implemented controllers.
+paths:
+  /auth/login:
+    post:
+      summary: POST /auth/login
+      security:
+      - csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+            Set-Cookie:
+              description: One or more cookies as specified by AUTH_CONTRACT; no credentials in JSON.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+  /auth/logout:
+    post:
+      summary: POST /auth/logout
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      - refreshCookie: []
+        csrfHeader: []
+      - csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+            Set-Cookie:
+              description: One or more cookies as specified by AUTH_CONTRACT; no credentials in JSON.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+  /auth/refresh:
+    post:
+      summary: POST /auth/refresh
+      security:
+      - refreshCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+            Set-Cookie:
+              description: One or more cookies as specified by AUTH_CONTRACT; no credentials in JSON.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+  /tickets:
+    get:
+      summary: GET /tickets
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffPage'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      - name: scope
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ALL
+          - MINE
+          - UNASSIGNED
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - WAITING
+          - RESOLVED
+          - CLOSED
+      - name: priority
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+      - name: late
+        in: query
+        required: false
+        schema:
+          type: boolean
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+    post:
+      summary: POST /tickets
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '201':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffIntake'
+  /tickets/{id}:
+    get:
+      summary: GET /tickets/{id}
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /tickets/{id}/claim:
+    post:
+      summary: POST /tickets/{id}/claim
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Already claimed or invalid state; authorized staff conflict may include assignedAgentDisplayName.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffClaimConflict'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /tickets/{id}/replies:
+    post:
+      summary: POST /tickets/{id}/replies
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+  /tickets/{id}/notes:
+    post:
+      summary: POST /tickets/{id}/notes
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+  /tickets/{id}/wait:
+    post:
+      summary: POST /tickets/{id}/wait
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+  /tickets/{id}/resolve:
+    post:
+      summary: POST /tickets/{id}/resolve
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveInput'
+  /tickets/{id}/reopen:
+    post:
+      summary: POST /tickets/{id}/reopen
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: 'Deprecated staff route: always forbidden; customer must use owning customer route.'
+      deprecated: true
+  /tickets/{id}/priority:
+    patch:
+      summary: PATCH /tickets/{id}/priority
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriorityInput'
+  /tickets/{id}/audit:
+    get:
+      summary: GET /tickets/{id}/audit
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditPage'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /customers:
+    get:
+      summary: GET /customers (staff-only directory of customer display names for ticket intake; no emails)
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerList'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /tickets/{id}/messages:
+    get:
+      summary: GET /tickets/{id}/messages (staff timeline, newest page first; nextCursor walks to older messages)
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffMessagePage'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /customer/tickets:
+    get:
+      summary: GET /customer/tickets
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPage'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      description: CUSTOMER only; ownership required, public projection only.
+    post:
+      summary: POST /customer/tickets
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '201':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: CUSTOMER only; ownership required, public projection only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerIntake'
+  /customer/tickets/{id}:
+    get:
+      summary: GET /customer/tickets/{id}
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicTicket'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: CUSTOMER only; ownership required, public projection only.
+  /customer/tickets/{id}/replies:
+    post:
+      summary: POST /customer/tickets/{id}/replies
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOutcome'
+        '201':
+          description: New linked ticket; old ticket reconciled if due
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOutcome'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: CUSTOMER only; ownership required, public projection only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+  /customer/tickets/{id}/reopen:
+    post:
+      summary: POST /customer/tickets/{id}/reopen
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOutcome'
+        '201':
+          description: New linked ticket; old ticket reconciled if due
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOutcome'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: CUSTOMER only; ownership required, public projection only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInput'
+  /healthz:
+    get:
+      summary: GET /healthz
+      security: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Liveness'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+  /readyz:
+    get:
+      summary: GET /readyz
+      security: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+  /customer/tickets/{id}/export:
+    get:
+      summary: Customer-owned public-only export
+      security:
+      - accessCookie: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: format
+        in: query
+        schema:
+          type: string
+          enum:
+          - json
+          - csv
+          default: json
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicTicket'
+            text/csv:
+              schema:
+                type: string
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: CUSTOMER only; ownership required, public projection only. JSON or CSV (formula-safe text); no
+        private identifiers, counts or metadata.
+  /customer/tickets/{id}/messages:
+    get:
+      summary: GET /customer/tickets/{id}/messages (PUBLIC messages of an owned ticket, newest page first)
+      security:
+      - accessCookie: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicMessagePage'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2048
+      description: Staff only; assigned actor for mutations except intake/claim; see DOMAIN_CONTRACT.
+  /admin/run-sla-sweep:
+    post:
+      summary: Lead-only idempotent sweep; server clock only
+      security:
+      - accessCookie: []
+        csrfHeader: []
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SweepResult'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      description: LEAD/ADMIN only; no caller time.
+  /auth/csrf:
+    get:
+      summary: Issue CSRF token
+      security: []
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules. With purpose=login the token is always
+        pre-login (valid only for POST /auth/login), even while an older session cookie is present.
+      parameters:
+      - name: purpose
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - login
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+            Set-Cookie:
+              description: One or more cookies as specified by AUTH_CONTRACT; no credentials in JSON.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Csrf'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/me:
+    get:
+      summary: Authenticated identity
+      security:
+      - accessCookie: []
+      description: See AUTH_CONTRACT for cookie, CSRF and Origin rules.
+      responses:
+        '200':
+          description: Success
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentSession'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden / CSRF
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Invisible resource
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: State/idempotency conflict
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Unavailable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+              description: No sensitive response caching
+            Vary:
+              schema:
+                type: string
+                example: Cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /internal/sweep:
+    post:
+      summary: Machine-authenticated scheduled sweep (external scheduler while the web service sleeps)
+      description: SYSTEM actor; same sweep service, leases, fencing and recovery as the in-process scheduler. Uses
+        a dedicated bearer credential (SWEEP_TRIGGER_TOKEN); no cookies, Origin or CSRF (not a browser route).
+        Disabled (404) unless configured. Idempotency-Key is the deterministic scheduled-slot identity; a retried
+        or duplicated delivery replays the stored outcome. No body or clock input is accepted.
+      security:
+      - machineToken: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{8,120}$
+      responses:
+        '200':
+          description: Success (or replay of the same slot)
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SweepResult'
+        '400':
+          description: Invalid input
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Missing or invalid machine credential
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Endpoint not configured
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Sweep already in progress
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Sweep failed or lease expired; committed progress preserved
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    accessCookie:
+      type: apiKey
+      in: cookie
+      name: frontdesk_access
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: frontdesk_refresh
+    csrfHeader:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+    machineToken:
+      type: http
+      scheme: bearer
+      description: Dedicated machine credential for /internal/* only; never a user credential.
+  schemas:
+    Viewer:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        role:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+      required:
+      - id
+      - displayName
+      - role
+    PublicMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        authorDisplayName:
+          type: string
+        authorType:
+          type: string
+          enum:
+          - STAFF
+          - CUSTOMER
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - body
+      - authorDisplayName
+      - authorType
+      - createdAt
+    StaffMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        author:
+          $ref: '#/components/schemas/Viewer'
+        kind:
+          type: string
+          enum:
+          - INTAKE
+          - REPLY
+          - REQUEST
+          - NOTE
+        visibility:
+          type: string
+          enum:
+          - PUBLIC
+          - PRIVATE
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - body
+      - author
+      - kind
+      - visibility
+      - createdAt
+    PublicTicketSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - WAITING
+          - RESOLVED
+          - CLOSED
+        createdAt:
+          type: string
+          format: date-time
+        parentTicketId:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - id
+      - subject
+      - status
+      - createdAt
+      - parentTicketId
+    PublicTicket:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - WAITING
+          - RESOLVED
+          - CLOSED
+        createdAt:
+          type: string
+          format: date-time
+        parentTicketId:
+          type: string
+          format: uuid
+          nullable: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicMessage'
+        olderMessagesCursor:
+          type: string
+          maxLength: 2048
+          nullable: true
+          description: Continuation for OLDER messages via the /messages endpoint (null = complete). messages holds the most recent page (at most 50), chronological.
+      required:
+      - id
+      - subject
+      - status
+      - createdAt
+      - parentTicketId
+      - messages
+      - olderMessagesCursor
+    SlaClock:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - RESPONSE
+          - RESOLUTION
+        cycle:
+          type: integer
+          minimum: 0
+        state:
+          type: string
+          enum:
+          - RUNNING
+          - PAUSED
+          - COMPLETED
+          - CANCELLED
+        cycleStartedAt:
+          type: string
+          format: date-time
+        budgetMs:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+        consumedMs:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+        remainingMs:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+        deadlineAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        currentLate:
+          type: boolean
+        firstBreachedAt:
+          type: string
+          format: date-time
+          nullable: true
+        breachDetectedNotRecorded:
+          type: boolean
+        asOf:
+          type: string
+          format: date-time
+        breachSequence:
+          type: integer
+          minimum: 0
+        policyRevision:
+          type: integer
+          minimum: 0
+      required:
+      - id
+      - kind
+      - cycle
+      - state
+      - cycleStartedAt
+      - budgetMs
+      - consumedMs
+      - remainingMs
+      - deadlineAt
+      - completedAt
+      - cancelledAt
+      - currentLate
+      - firstBreachedAt
+      - breachDetectedNotRecorded
+      - asOf
+      - breachSequence
+      - policyRevision
+    StaffTicketSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - WAITING
+          - RESOLVED
+          - CLOSED
+        priority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+        requestedPriority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+          nullable: true
+        customerId:
+          type: string
+          format: uuid
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+        assigneeDisplayName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        parentTicketId:
+          type: string
+          format: uuid
+          nullable: true
+        version:
+          type: integer
+          minimum: 0
+        resolutionCycle:
+          type: integer
+          minimum: 0
+        waitingCloseDueAt:
+          type: string
+          format: date-time
+          nullable: true
+        reopenUntil:
+          type: string
+          format: date-time
+          nullable: true
+        closeReason:
+          type: string
+          enum:
+          - AUTO_CLOSED_NO_REPLY
+          - RESOLUTION_WINDOW_EXPIRED
+          - null
+          - null
+          nullable: true
+        clocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaClock'
+      required:
+      - id
+      - subject
+      - status
+      - priority
+      - requestedPriority
+      - customerId
+      - assigneeId
+      - assigneeDisplayName
+      - createdAt
+      - updatedAt
+      - parentTicketId
+      - version
+      - resolutionCycle
+      - waitingCloseDueAt
+      - reopenUntil
+      - closeReason
+      - clocks
+    StaffTicket:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - WAITING
+          - RESOLVED
+          - CLOSED
+        priority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+        requestedPriority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+          nullable: true
+        customerId:
+          type: string
+          format: uuid
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+        assigneeDisplayName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        parentTicketId:
+          type: string
+          format: uuid
+          nullable: true
+        version:
+          type: integer
+          minimum: 0
+        resolutionCycle:
+          type: integer
+          minimum: 0
+        waitingCloseDueAt:
+          type: string
+          format: date-time
+          nullable: true
+        reopenUntil:
+          type: string
+          format: date-time
+          nullable: true
+        closeReason:
+          type: string
+          enum:
+          - AUTO_CLOSED_NO_REPLY
+          - RESOLUTION_WINDOW_EXPIRED
+          - null
+          - null
+          nullable: true
+        clocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlaClock'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffMessage'
+        olderMessagesCursor:
+          type: string
+          maxLength: 2048
+          nullable: true
+          description: Continuation for OLDER messages via the /messages endpoint (null = complete). messages holds the most recent page (at most 50), chronological.
+      required:
+      - id
+      - subject
+      - status
+      - priority
+      - requestedPriority
+      - customerId
+      - assigneeId
+      - assigneeDisplayName
+      - createdAt
+      - updatedAt
+      - parentTicketId
+      - version
+      - resolutionCycle
+      - waitingCloseDueAt
+      - reopenUntil
+      - closeReason
+      - clocks
+      - messages
+      - olderMessagesCursor
+    CustomerSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+      required:
+      - id
+      - displayName
+    CustomerList:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSummary'
+      required:
+      - items
+    StaffMessagePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffMessage'
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+      - items
+      - nextCursor
+    PublicMessagePage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicMessage'
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+      - items
+      - nextCursor
+    StaffPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffTicketSummary'
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+      - items
+      - nextCursor
+    PublicPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicTicketSummary'
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+      - items
+      - nextCursor
+    AuditPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEvent'
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+      - items
+      - nextCursor
+    AuditEvent:
+      description: Strict staff-only ticket event union. Action determines the exact safe payload. No arbitrary
+        JSON.
+      oneOf:
+      - $ref: '#/components/schemas/AuditTicketCreated'
+      - $ref: '#/components/schemas/AuditTicketClaimed'
+      - $ref: '#/components/schemas/AuditTicketReassigned'
+      - $ref: '#/components/schemas/AuditMessagePublished'
+      - $ref: '#/components/schemas/AuditInternalNoteAdded'
+      - $ref: '#/components/schemas/AuditPriorityChanged'
+      - $ref: '#/components/schemas/AuditSlaPaused'
+      - $ref: '#/components/schemas/AuditSlaResumed'
+      - $ref: '#/components/schemas/AuditSlaBreached'
+      - $ref: '#/components/schemas/AuditSlaCompleted'
+      - $ref: '#/components/schemas/AuditSlaCancelled'
+      - $ref: '#/components/schemas/AuditTicketWaiting'
+      - $ref: '#/components/schemas/AuditTicketResumed'
+      - $ref: '#/components/schemas/AuditTicketResolved'
+      - $ref: '#/components/schemas/AuditTicketClosed'
+      - $ref: '#/components/schemas/AuditTicketReopened'
+      - $ref: '#/components/schemas/AuditLinkedTicketCreated'
+    CustomerOutcome:
+      type: object
+      additionalProperties: false
+      properties:
+        outcome:
+          type: string
+          enum:
+          - SAME_TICKET
+          - NEW_LINKED_TICKET
+        ticket:
+          $ref: '#/components/schemas/PublicTicket'
+        previousTicketId:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - outcome
+      - ticket
+      - previousTicketId
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+      required:
+      - code
+      - message
+      - requestId
+    SessionResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        viewer:
+          $ref: '#/components/schemas/Viewer'
+        csrfToken:
+          type: string
+        sessionContext:
+          $ref: '#/components/schemas/SessionContext'
+      required:
+      - viewer
+      - csrfToken
+      - sessionContext
+    SessionContext:
+      type: string
+      minLength: 32
+      maxLength: 32
+      description: Opaque, non-secret identifier of the session a tab was rendered for. Send it as
+        X-Session-Context on every request; required on authenticated business mutations. A mismatch with the
+        session authenticated by the cookies is rejected with 409 SESSION_CHANGED (a stale tab cannot act or read
+        as a replacement identity). Grants nothing without the cookies.
+    CurrentSession:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        role:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+        sessionContext:
+          $ref: '#/components/schemas/SessionContext'
+      required:
+      - id
+      - displayName
+      - role
+      - sessionContext
+    Csrf:
+      type: object
+      additionalProperties: false
+      properties:
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
+    Ok:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
+    Liveness:
+      type: object
+      additionalProperties: false
+      description: Liveness plus the deployed source revision (the same value as the OCI revision label), so an
+        external check can confirm exactly which build is serving.
+      properties:
+        ok:
+          type: boolean
+        commit:
+          type: string
+          pattern: ^([0-9a-f]{40}|unknown)$
+      required:
+      - ok
+      - commit
+    SweepResult:
+      type: object
+      additionalProperties: false
+      properties:
+        invocationId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+        processed:
+          type: integer
+          minimum: 0
+        autoClosed:
+          type: integer
+          minimum: 0
+        expired:
+          type: integer
+          minimum: 0
+        breachesRecorded:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+        moreDue:
+          type: boolean
+      required:
+      - invocationId
+      - correlationId
+      - processed
+      - autoClosed
+      - expired
+      - breachesRecorded
+      - failed
+      - moreDue
+    StaffIntake:
+      type: object
+      additionalProperties: false
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        priority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+      required:
+      - customerId
+      - subject
+      - body
+      - priority
+    CustomerIntake:
+      type: object
+      additionalProperties: false
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        requestedPriority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+      required:
+      - subject
+      - body
+    MessageInput:
+      type: object
+      additionalProperties: false
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+      required:
+      - body
+    ResolveInput:
+      type: object
+      additionalProperties: false
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 10000
+    PriorityInput:
+      type: object
+      additionalProperties: false
+      properties:
+        priority:
+          type: string
+          enum:
+          - URGENT
+          - MEDIUM
+          - LOW
+          - null
+          - null
+      required:
+      - priority
+    LoginInput:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 256
+      required:
+      - email
+      - password
+    StaffClaimConflict:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+        assignedAgentDisplayName:
+          type: string
+      required:
+      - code
+      - message
+      - requestId
+    AuditClockSnapshot:
+      type: object
+      additionalProperties: false
+      properties:
+        clockId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - RESPONSE
+          - RESOLUTION
+        cycle:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        state:
+          type: string
+          enum:
+          - RUNNING
+          - PAUSED
+          - COMPLETED
+          - CANCELLED
+        budgetMs:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        consumedMs:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        deadlineAt:
+          type: string
+          format: date-time
+          nullable: true
+        currentLate:
+          type: boolean
+        breachSequence:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        policyRevision:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+      - clockId
+      - kind
+      - cycle
+      - state
+      - budgetMs
+      - consumedMs
+      - deadlineAt
+      - currentLate
+      - breachSequence
+      - policyRevision
+    AuditClockRevision:
+      type: object
+      additionalProperties: false
+      properties:
+        before:
+          $ref: '#/components/schemas/AuditClockSnapshot'
+        after:
+          $ref: '#/components/schemas/AuditClockSnapshot'
+      required:
+      - before
+      - after
+    AuditTicketCreated:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_CREATED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            version:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            priority:
+              type: string
+              enum:
+              - URGENT
+              - MEDIUM
+              - LOW
+            initialMessageId:
+              type: string
+              format: uuid
+            parentTicketId:
+              type: string
+              format: uuid
+              nullable: true
+            clocks:
+              type: array
+              items:
+                $ref: '#/components/schemas/AuditClockSnapshot'
+          required:
+          - version
+          - priority
+          - initialMessageId
+          - parentTicketId
+          - clocks
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketClaimed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_CLAIMED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            assigneeId:
+              type: string
+              format: uuid
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - assigneeId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketReassigned:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_REASSIGNED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            previousAssigneeId:
+              type: string
+              format: uuid
+              nullable: true
+            assigneeId:
+              type: string
+              format: uuid
+              nullable: true
+          required:
+          - beforeVersion
+          - afterVersion
+          - previousAssigneeId
+          - assigneeId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditMessagePublished:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - MESSAGE_PUBLISHED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            messageId:
+              type: string
+              format: uuid
+            messageKind:
+              type: string
+              enum:
+              - INTAKE
+              - REPLY
+              - REQUEST
+            publishedAt:
+              type: string
+              format: date-time
+          required:
+          - beforeVersion
+          - afterVersion
+          - messageId
+          - messageKind
+          - publishedAt
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditInternalNoteAdded:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - INTERNAL_NOTE_ADDED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            messageId:
+              type: string
+              format: uuid
+          required:
+          - beforeVersion
+          - afterVersion
+          - messageId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditPriorityChanged:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - PRIORITY_CHANGED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            previousPriority:
+              type: string
+              enum:
+              - URGENT
+              - MEDIUM
+              - LOW
+            newPriority:
+              type: string
+              enum:
+              - URGENT
+              - MEDIUM
+              - LOW
+            clocks:
+              type: array
+              items:
+                $ref: '#/components/schemas/AuditClockRevision'
+          required:
+          - beforeVersion
+          - afterVersion
+          - previousPriority
+          - newPriority
+          - clocks
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditSlaPaused:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - SLA_PAUSED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            clock:
+              $ref: '#/components/schemas/AuditClockRevision'
+            pausedAt:
+              type: string
+              format: date-time
+            requestMessageId:
+              type: string
+              format: uuid
+            waitingCloseDueAt:
+              type: string
+              format: date-time
+          required:
+          - beforeVersion
+          - afterVersion
+          - clock
+          - pausedAt
+          - requestMessageId
+          - waitingCloseDueAt
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditSlaResumed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - SLA_RESUMED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            clock:
+              $ref: '#/components/schemas/AuditClockRevision'
+            resumedAt:
+              type: string
+              format: date-time
+            customerMessageId:
+              type: string
+              format: uuid
+          required:
+          - beforeVersion
+          - afterVersion
+          - clock
+          - resumedAt
+          - customerMessageId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditSlaBreached:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - SLA_BREACHED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            clock:
+              $ref: '#/components/schemas/AuditClockSnapshot'
+            breachedAt:
+              type: string
+              format: date-time
+            recordedAt:
+              type: string
+              format: date-time
+            missedDeadlineAt:
+              type: string
+              format: date-time
+              nullable: true
+            cause:
+              type: string
+              enum:
+              - DEADLINE_EXCEEDED
+              - PRIORITY_ESCALATION
+          required:
+          - beforeVersion
+          - afterVersion
+          - clock
+          - breachedAt
+          - recordedAt
+          - missedDeadlineAt
+          - cause
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditSlaCompleted:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - SLA_COMPLETED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            clock:
+              $ref: '#/components/schemas/AuditClockRevision'
+            completedAt:
+              type: string
+              format: date-time
+            qualifyingMessageId:
+              type: string
+              format: uuid
+              nullable: true
+          required:
+          - beforeVersion
+          - afterVersion
+          - clock
+          - completedAt
+          - qualifyingMessageId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditSlaCancelled:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - SLA_CANCELLED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            clock:
+              $ref: '#/components/schemas/AuditClockRevision'
+            cancelledAt:
+              type: string
+              format: date-time
+            reason:
+              type: string
+              enum:
+              - AUTO_CLOSED_NO_REPLY
+          required:
+          - beforeVersion
+          - afterVersion
+          - clock
+          - cancelledAt
+          - reason
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketWaiting:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_WAITING
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            waitingSince:
+              type: string
+              format: date-time
+            waitingCloseDueAt:
+              type: string
+              format: date-time
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - waitingSince
+          - waitingCloseDueAt
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketResumed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_RESUMED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            customerMessageId:
+              type: string
+              format: uuid
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - customerMessageId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketResolved:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_RESOLVED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            resolvedAt:
+              type: string
+              format: date-time
+            reopenUntil:
+              type: string
+              format: date-time
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - resolvedAt
+          - reopenUntil
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketClosed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_CLOSED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            closedAt:
+              type: string
+              format: date-time
+            cutoffAt:
+              type: string
+              format: date-time
+            closeReason:
+              type: string
+              enum:
+              - AUTO_CLOSED_NO_REPLY
+              - RESOLUTION_WINDOW_EXPIRED
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - closedAt
+          - cutoffAt
+          - closeReason
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditTicketReopened:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - TICKET_REOPENED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            beforeStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            afterStatus:
+              type: string
+              enum:
+              - OPEN
+              - IN_PROGRESS
+              - WAITING
+              - RESOLVED
+              - CLOSED
+            resolutionCycle:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            newClock:
+              $ref: '#/components/schemas/AuditClockSnapshot'
+            customerMessageId:
+              type: string
+              format: uuid
+          required:
+          - beforeVersion
+          - afterVersion
+          - beforeStatus
+          - afterStatus
+          - resolutionCycle
+          - newClock
+          - customerMessageId
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+    AuditLinkedTicketCreated:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        actorId:
+          type: string
+          format: uuid
+          nullable: true
+        actorType:
+          type: string
+          enum:
+          - AGENT
+          - LEAD
+          - ADMIN
+          - CUSTOMER
+          - SYSTEM
+        action:
+          type: string
+          enum:
+          - LINKED_TICKET_CREATED
+        createdAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+        reasonCode:
+          type: string
+          nullable: true
+        details:
+          type: object
+          additionalProperties: false
+          properties:
+            beforeVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            afterVersion:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            childTicketId:
+              type: string
+              format: uuid
+            reason:
+              type: string
+              enum:
+              - AUTO_CLOSED_NO_REPLY
+              - RESOLUTION_WINDOW_EXPIRED
+          required:
+          - beforeVersion
+          - afterVersion
+          - childTicketId
+          - reason
+      required:
+      - id
+      - ticketId
+      - actorId
+      - actorType
+      - action
+      - createdAt
+      - correlationId
+      - reasonCode
+      - details
+security:
+- accessCookie: []
+servers:
+- url: /api

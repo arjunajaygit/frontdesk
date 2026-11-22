@@ -1,0 +1,8 @@
+Targeted fixtures passed (nullable ticket fields, invalid enum rejection, restricted claim error, typed audit action and secret rejection); 248 local references resolved; 23 paths; 44 schemas.
+Not full OpenAPI-aware validation; Prisma/SQL/HTTP/browser/deployment remain unverified.
+RTM: 24 entries, 5 columns.
+Preserved byte-for-byte: docs/original-assessment.pdf; SHA256 05ec8583cd49b8a5a3d2f3d337e91bcc9ffd09dc28899575c52a5ef7b40e1739
+Preserved byte-for-byte: src/calendar.mjs; SHA256 10ae8efd45f6604e8eacd44c8a3c3d0a5293e3c0316dcdc5c762b5d1bafb7c89
+Preserved byte-for-byte: tests/calendar.test.mjs; SHA256 802ef9c403e45f40e930726a669b243ea28af51ae6bbeed47fddb92487693f11
+Preserved byte-for-byte: tests/calendar-boundaries.test.mjs; SHA256 9c174a455a7f78b2c17b8ca1165aa87e4edb3bfc9ea83ed64464a3c9eb511aa9
+Calendar suite: 12 pass, 0 fail (see calendar-test-results.txt).

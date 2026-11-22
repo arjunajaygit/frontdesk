@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: exact closing start advances to next opening
+ok 1 - exact closing start advances to next opening
+  ---
+  duration_ms: 1.2432
+  type: 'test'
+  ...
+# Subtest: zero budget returns exact start even out of hours
+ok 2 - zero budget returns exact start even out of hours
+  ---
+  duration_ms: 0.192917
+  type: 'test'
+  ...
+# Subtest: consecutive holidays skip Monday and Tuesday
+ok 3 - consecutive holidays skip Monday and Tuesday
+  ---
+  duration_ms: 1.322996
+  type: 'test'
+  ...
+# Subtest: medium Friday deadline examples
+ok 4 - medium Friday deadline examples
+  ---
+  duration_ms: 0.256564
+  type: 'test'
+  ...
+# Subtest: add and elapsed round trip including single millisecond
+ok 5 - add and elapsed round trip including single millisecond
+  ---
+  duration_ms: 0.360317
+  type: 'test'
+  ...
+# Subtest: pause example: urgent day budget consumed before wait
+ok 6 - pause example: urgent day budget consumed before wait
+  ---
+  duration_ms: 0.124002
+  type: 'test'
+  ...
+# Subtest: Friday 18:00 plus two business hours
+ok 7 - Friday 18:00 plus two business hours
+  ---
+  duration_ms: 1.690389
+  type: 'test'
+  ...
+# Subtest: holiday skipped
+ok 8 - holiday skipped
+  ---
+  duration_ms: 0.203249
+  type: 'test'
+  ...
+# Subtest: weekend elapsed excluded
+ok 9 - weekend elapsed excluded
+  ---
+  duration_ms: 1.281073
+  type: 'test'
+  ...
+# Subtest: exact closing boundary
+ok 10 - exact closing boundary
+  ---
+  duration_ms: 0.253896
+  type: 'test'
+  ...
+# Subtest: urgent effective day
+ok 11 - urgent effective day
+  ---
+  duration_ms: 0.247961
+  type: 'test'
+  ...
+# Subtest: negative rejected
+ok 12 - negative rejected
+  ---
+  duration_ms: 0.276834
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 83.235828

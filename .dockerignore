@@ -1,0 +1,20 @@
+# Allowlist: nothing enters the build context unless listed. Secrets (.env*, .local/), Git metadata, tests,
+# screenshots, assessment documents and local artefacts can therefore never reach an image layer.
+*
+!package.json
+!package-lock.json
+!tsconfig.base.json
+!apps/**
+!packages/**
+!prisma/schema.prisma
+!prisma/seed.ts
+!prisma/seed-data.ts
+!prisma/credentials.ts
+!prisma/migrations/**
+!src/calendar.mjs
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+**/.vite
+**/*.test.ts
+**/*.test.tsx

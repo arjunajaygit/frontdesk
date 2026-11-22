@@ -1,0 +1,11 @@
+# Gitleaks configuration: default ruleset + ONE narrowly scoped allowlist entry (documented, reviewed).
+title = "Frontdesk gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Fixed fake idempotency keys used as inputs in the API-client unit tests (not credentials)."
+condition = "AND"
+paths = ['''apps/web/src/lib/api\.test\.ts''']
+regexes = ['''(?i)(key-12345678|k-0123456789)''']

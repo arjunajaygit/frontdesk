@@ -1,0 +1,1842 @@
+{
+  "$id": "frontdesk-audit",
+  "description": "GENERATED from docs/openapi.draft.yaml by scripts/gen-audit-schema.ts — do not edit.",
+  "components": {
+    "schemas": {
+      "AuditClockRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "before": {
+            "$ref": "#/components/schemas/AuditClockSnapshot"
+          },
+          "after": {
+            "$ref": "#/components/schemas/AuditClockSnapshot"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ]
+      },
+      "AuditClockSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "clockId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "RESPONSE",
+              "RESOLUTION"
+            ]
+          },
+          "cycle": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "PAUSED",
+              "COMPLETED",
+              "CANCELLED"
+            ]
+          },
+          "budgetMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "consumedMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentLate": {
+            "type": "boolean"
+          },
+          "breachSequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "policyRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "clockId",
+          "kind",
+          "cycle",
+          "state",
+          "budgetMs",
+          "consumedMs",
+          "deadlineAt",
+          "currentLate",
+          "breachSequence",
+          "policyRevision"
+        ]
+      },
+      "AuditEvent": {
+        "description": "Strict staff-only ticket event union. Action determines the exact safe payload. No arbitrary JSON.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AuditTicketCreated"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketClaimed"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketReassigned"
+          },
+          {
+            "$ref": "#/components/schemas/AuditMessagePublished"
+          },
+          {
+            "$ref": "#/components/schemas/AuditInternalNoteAdded"
+          },
+          {
+            "$ref": "#/components/schemas/AuditPriorityChanged"
+          },
+          {
+            "$ref": "#/components/schemas/AuditSlaPaused"
+          },
+          {
+            "$ref": "#/components/schemas/AuditSlaResumed"
+          },
+          {
+            "$ref": "#/components/schemas/AuditSlaBreached"
+          },
+          {
+            "$ref": "#/components/schemas/AuditSlaCompleted"
+          },
+          {
+            "$ref": "#/components/schemas/AuditSlaCancelled"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketWaiting"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketResumed"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketResolved"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketClosed"
+          },
+          {
+            "$ref": "#/components/schemas/AuditTicketReopened"
+          },
+          {
+            "$ref": "#/components/schemas/AuditLinkedTicketCreated"
+          }
+        ]
+      },
+      "AuditInternalNoteAdded": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "INTERNAL_NOTE_ADDED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "messageId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "messageId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditLinkedTicketCreated": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "LINKED_TICKET_CREATED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "childTicketId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "AUTO_CLOSED_NO_REPLY",
+                  "RESOLUTION_WINDOW_EXPIRED"
+                ]
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "childTicketId",
+              "reason"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditMessagePublished": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_PUBLISHED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "messageId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "messageKind": {
+                "type": "string",
+                "enum": [
+                  "INTAKE",
+                  "REPLY",
+                  "REQUEST"
+                ]
+              },
+              "publishedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "messageId",
+              "messageKind",
+              "publishedAt"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditPriorityChanged": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "PRIORITY_CHANGED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "previousPriority": {
+                "type": "string",
+                "enum": [
+                  "URGENT",
+                  "MEDIUM",
+                  "LOW"
+                ]
+              },
+              "newPriority": {
+                "type": "string",
+                "enum": [
+                  "URGENT",
+                  "MEDIUM",
+                  "LOW"
+                ]
+              },
+              "clocks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AuditClockRevision"
+                }
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "previousPriority",
+              "newPriority",
+              "clocks"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditSlaBreached": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SLA_BREACHED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "clock": {
+                "$ref": "#/components/schemas/AuditClockSnapshot"
+              },
+              "breachedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "recordedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "missedDeadlineAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "cause": {
+                "type": "string",
+                "enum": [
+                  "DEADLINE_EXCEEDED",
+                  "PRIORITY_ESCALATION"
+                ]
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "clock",
+              "breachedAt",
+              "recordedAt",
+              "missedDeadlineAt",
+              "cause"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditSlaCancelled": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SLA_CANCELLED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "clock": {
+                "$ref": "#/components/schemas/AuditClockRevision"
+              },
+              "cancelledAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "AUTO_CLOSED_NO_REPLY"
+                ]
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "clock",
+              "cancelledAt",
+              "reason"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditSlaCompleted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SLA_COMPLETED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "clock": {
+                "$ref": "#/components/schemas/AuditClockRevision"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "qualifyingMessageId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "clock",
+              "completedAt",
+              "qualifyingMessageId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditSlaPaused": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SLA_PAUSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "clock": {
+                "$ref": "#/components/schemas/AuditClockRevision"
+              },
+              "pausedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "requestMessageId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "waitingCloseDueAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "clock",
+              "pausedAt",
+              "requestMessageId",
+              "waitingCloseDueAt"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditSlaResumed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SLA_RESUMED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "clock": {
+                "$ref": "#/components/schemas/AuditClockRevision"
+              },
+              "resumedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "customerMessageId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "clock",
+              "resumedAt",
+              "customerMessageId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketClaimed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_CLAIMED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "assigneeId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "assigneeId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketClosed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_CLOSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "closedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "cutoffAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "closeReason": {
+                "type": "string",
+                "enum": [
+                  "AUTO_CLOSED_NO_REPLY",
+                  "RESOLUTION_WINDOW_EXPIRED"
+                ]
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "closedAt",
+              "cutoffAt",
+              "closeReason"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketCreated": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_CREATED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "version": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "URGENT",
+                  "MEDIUM",
+                  "LOW"
+                ]
+              },
+              "initialMessageId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "parentTicketId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "clocks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AuditClockSnapshot"
+                }
+              }
+            },
+            "required": [
+              "version",
+              "priority",
+              "initialMessageId",
+              "parentTicketId",
+              "clocks"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketReassigned": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_REASSIGNED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "previousAssigneeId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "assigneeId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "previousAssigneeId",
+              "assigneeId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketReopened": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_REOPENED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "resolutionCycle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "newClock": {
+                "$ref": "#/components/schemas/AuditClockSnapshot"
+              },
+              "customerMessageId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "resolutionCycle",
+              "newClock",
+              "customerMessageId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketResolved": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_RESOLVED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "resolvedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "reopenUntil": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "resolvedAt",
+              "reopenUntil"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketResumed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_RESUMED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "customerMessageId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "customerMessageId"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      },
+      "AuditTicketWaiting": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ticketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "AGENT",
+              "LEAD",
+              "ADMIN",
+              "CUSTOMER",
+              "SYSTEM"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "TICKET_WAITING"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "reasonCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "beforeVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "afterVersion": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "beforeStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "afterStatus": {
+                "type": "string",
+                "enum": [
+                  "OPEN",
+                  "IN_PROGRESS",
+                  "WAITING",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              "waitingSince": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "waitingCloseDueAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "beforeVersion",
+              "afterVersion",
+              "beforeStatus",
+              "afterStatus",
+              "waitingSince",
+              "waitingCloseDueAt"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "ticketId",
+          "actorId",
+          "actorType",
+          "action",
+          "createdAt",
+          "correlationId",
+          "reasonCode",
+          "details"
+        ]
+      }
+    }
+  }
+}

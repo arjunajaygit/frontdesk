@@ -1,0 +1,7 @@
+# Paths withheld from the publication candidate (final audit H04). One path per line; reason after " # ".
+docs/original-assessment.pdf # employer assessment document: no redistribution permission
+docs/baseline-v2-reference.pdf # internal baseline PDF: not approved for redistribution
+docs/CODEX_AUDIT_V3.txt # raw private audit report; also contains a local absolute path with the developer's username
+CLAUDE.md # private AI-agent configuration
+AGENTS.md # private AI-agent configuration
+START_CLAUDE.txt # private AI-agent instructions

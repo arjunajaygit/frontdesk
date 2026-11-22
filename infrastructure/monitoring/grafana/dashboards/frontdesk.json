@@ -1,0 +1,573 @@
+{
+  "uid": "frontdesk-ops",
+  "title": "Frontdesk \u2014 operations",
+  "tags": ["frontdesk"],
+  "timezone": "Asia/Kolkata",
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "description": "Process-local counters (reset on restart, per instance). Durable business totals live in PostgreSQL (audit log, sweep invocations). Thresholds are initial settings, not SLOs.",
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Availability (scrape up)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "up{job=\"frontdesk\"}",
+          "legendFormat": "up"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Database reachable",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "frontdesk_db_up",
+          "legendFormat": "db"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Minutes since last completed sweep",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "m"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "(time() - frontdesk_sweep_last_scheduled_success_timestamp_seconds) / 60 and frontdesk_sweep_last_scheduled_success_timestamp_seconds > 0",
+          "legendFormat": "min"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Sweep backlog (moreDue)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "frontdesk_sweep_more_due",
+          "legendFormat": "moreDue"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Request throughput by route",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum by (route) (rate(frontdesk_http_requests_total[5m]))",
+          "legendFormat": "{{route}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Error rate (4xx / 5xx share)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum(rate(frontdesk_http_requests_total{status_class=\"5xx\"}[5m])) / clamp_min(sum(rate(frontdesk_http_requests_total[5m])),1e-9)",
+          "legendFormat": "5xx"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum(rate(frontdesk_http_requests_total{status_class=\"4xx\"}[5m])) / clamp_min(sum(rate(frontdesk_http_requests_total[5m])),1e-9)",
+          "legendFormat": "4xx"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Latency P50 / P95 / P99",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(frontdesk_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p50"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(frontdesk_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(frontdesk_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Runtime: resident memory, heap, CPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "frontdesk_process_resident_memory_bytes",
+          "legendFormat": "rss"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "frontdesk_nodejs_heap_size_used_bytes",
+          "legendFormat": "heap used"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "CPU seconds / s",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "rate(frontdesk_process_cpu_seconds_total[5m])",
+          "legendFormat": "cpu"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Event-loop lag P99",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "frontdesk_nodejs_eventloop_lag_p99_seconds",
+          "legendFormat": "p99 lag"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Claim contention: won vs conflict",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum by (outcome) (increase(frontdesk_ticket_claims_total[15m]))",
+          "legendFormat": "{{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Ticket command outcomes",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum by (command, outcome) (increase(frontdesk_ticket_commands_total[15m]))",
+          "legendFormat": "{{command}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "SLA breaches recorded by clock / priority",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum by (clock, priority) (increase(frontdesk_sla_breaches_recorded_total[1h]))",
+          "legendFormat": "{{clock}} {{priority}}"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Sweep invocations by outcome",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "sum by (initiator, outcome) (increase(frontdesk_sweep_invocations_total[15m]))",
+          "legendFormat": "{{initiator}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Sweep duration P95 and tickets processed",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(frontdesk_sweep_duration_seconds_bucket[15m])))",
+          "legendFormat": "p95 duration (s)"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "increase(frontdesk_sweep_tickets_processed_total[15m])",
+          "legendFormat": "tickets processed"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Lease recoveries (expired sweeps terminalised)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "frontdesk-prom"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "frontdesk-prom"
+          },
+          "expr": "increase(frontdesk_sweep_lease_recoveries_total[1h])",
+          "legendFormat": "recoveries"
+        }
+      ]
+    }
+  ]
+}

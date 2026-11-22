@@ -1,0 +1,62 @@
+rules:
+  - id: frontdesk-prisma-unsafe-raw-sql
+    message: 'Unsafe raw SQL (string interpolation risk). Use tagged $queryRaw/$executeRaw with parameters.'
+    severity: ERROR
+    languages: [typescript]
+    pattern-either:
+      - pattern: $DB.$queryRawUnsafe(...)
+      - pattern: $DB.$executeRawUnsafe(...)
+  - id: frontdesk-web-token-or-session-in-browser-storage
+    message: 'Never persist tokens, sessions or cached staff data in localStorage/sessionStorage (AUTH_CONTRACT).'
+    severity: ERROR
+    languages: [typescript]
+    paths: { include: ['apps/web/src/**'], exclude: ['**/*.test.ts', '**/*.test.tsx'] }
+    pattern-either:
+      - pattern: localStorage.setItem(...)
+      - pattern: sessionStorage.setItem(...)
+      - pattern: window.localStorage.setItem(...)
+      - pattern: window.sessionStorage.setItem(...)
+  - id: frontdesk-react-dangerous-html
+    message: 'Rendering raw HTML is forbidden; ticket content must be rendered as text.'
+    severity: ERROR
+    languages: [typescript]
+    pattern: <$X dangerouslySetInnerHTML={...} />
+  - id: frontdesk-jwt-verify-without-algorithm-allowlist
+    message: 'jwt.verify must pin algorithms (alg=none / algorithm confusion).'
+    severity: ERROR
+    languages: [typescript]
+    patterns:
+      - pattern-either:
+          - pattern: jwt.verify($T, $K)
+          - pattern: jwt.verify($T, $K, { ... })
+      - pattern-not: 'jwt.verify($T, $K, { algorithms: [...], ... })'
+  - id: frontdesk-cookie-without-options
+    message: 'Cookies must always be set with explicit HttpOnly/SameSite/Secure/Path options (use CookieWriter).'
+    severity: ERROR
+    languages: [typescript]
+    pattern: $RES.cookie($NAME, $VALUE)
+  - id: frontdesk-console-logging-in-api
+    message: 'Use the Pino logger with classified metadata; console output can leak raw error text.'
+    severity: WARNING
+    languages: [typescript]
+    paths: { include: ['apps/api/src/**'], exclude: ['apps/api/src/main.ts'] }
+    pattern-either:
+      - pattern: console.log(...)
+      - pattern: console.error(...)
+  - id: frontdesk-raw-error-message-in-log-or-response
+    message: 'Do not log or return raw exception messages (dependency errors may contain secrets/private content); use errorMeta().'
+    severity: ERROR
+    languages: [typescript]
+    paths:
+      {
+        include: ['apps/api/src/**'],
+        exclude:
+          [
+            'apps/api/src/main.ts',
+            'apps/api/src/common/exception.filter.ts',
+            'apps/api/src/common/app-error.ts',
+          ],
+      }
+    pattern-either:
+      - pattern: '$LOG.$LVL({ ..., err: { ..., message: $E.message, ... }, ... }, ...)'
+      - pattern: $LOG.$LVL($E.message)
