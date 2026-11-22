@@ -45,7 +45,7 @@ M8-H01,"Session restoration, login CSRF, confirmed logout",Auth/Web,sessions.spe
 M8-H02,Server-enforced session binding for tabs (no cross-identity retries),Auth/Web,"sessions.spec.ts (two tabs, one context; mutation-tested) + final-audit-auth.test.ts",Executed
 M8-H03,"Gated release: approved ref, exact SHA, passing checks, one amd64 artifact, digest-verified signing",CI/CD,tests/release/release-gate.test.mjs + workflows.test.ts,"Executed remotely: release runs 44995728324, 45017938581; signature + attestation verified independently"
 M8-H04,Sanitized publication candidate,Release,scripts/build-publication.sh + Gitleaks on candidate,Executed: sanitized history published (private repo); Gitleaks full history passes in CI
-M8-H05,Hosted submission,Deploy,DEPLOYMENT.md M8 plan; Supabase rehearsal,Verified live (M8_DEPLOYMENT_EVIDENCE.md); cold start UNKNOWN; reviewer repo access pending owner
+M8-H05,Hosted submission,Deploy,DEPLOYMENT.md M8 plan; Supabase rehearsal,Verified live (M8_DEPLOYMENT_EVIDENCE.md); cold start measured once (≈ 39 s); reviewer repo access pending owner
 M8-M01,Principal-keyed rate limiting,API,final-audit-auth.test.ts + rate-limiter.test.ts + k6 mixed (0 x 429),Executed
 M8-M02,Serialised credential-producing operations,Seed/Ops,seed-concurrency.test.ts (real processes),Executed
 M8-M03,Shutdown drain before DB disconnect,Scheduler,shutdown-drain.test.ts (real SIGTERM),Executed

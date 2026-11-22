@@ -102,7 +102,7 @@ V3.2: follow-up audit corrected at contract level. Draft schema, SQL, API and en
 - A 30-minute Supabase Cron sweep with the token held in Vault.
 - Dependabot cleanup within the authorized scope.
 
-**Live results (revision `9cadd0b`, digest `b5ef0a7f…`).** Smoke 29/29, workflows 29/29, browser 8/8, and 0 px of empty page scroll. The external cron slots at 11:30 and 12:00 each returned HTTP 200 and persisted a COMPLETED invocation. Cold start is UNKNOWN. Full detail is in M8_DEPLOYMENT_EVIDENCE.md.
+**Live results (revision `9cadd0b`, digest `b5ef0a7f…`, and again on the redesign `136ee89`, digest `ebf7a980…`).** Smoke 29/29, workflows 29/29, browser 8/8, and 0 px of empty page scroll. The external cron slots at 11:30 and 12:00 each returned HTTP 200 and persisted a COMPLETED invocation. The 12:30 slot did the same against a sleeping instance, and at 13:00 the cron call itself auto-closed an overdue verification ticket (audit correlated to `ext-cron-202611221300`). One cold start was measured on a sleeping instance by the 12:30 cron call: about 38.6 s to HTTP 200. Full detail is in M8_DEPLOYMENT_EVIDENCE.md.
 
 **Failures found and fixed (none bypassed).**
 - *First CI runs:* contracts build missing in the integration job; k6 origin; a flaky metrics regex; one suite writing to the shared template DB; PROOF-02 pool size on 2-vCPU runners.
@@ -115,10 +115,9 @@ V3.2: follow-up audit corrected at contract level. Draft schema, SQL, API and en
 - My own browsing of the live site once woke the instance and would have invalidated an asleep test. Those waiters were stopped and the test rescheduled.
 - The persisted cron-processing test was redesigned around the scheduler's fixed phase rather than sleep, because the instance stayed awake.
 
-**Coordination.** The owner's README PR (#12) was merged after all its checks passed on the updated head, and its README is now the source of truth here. The frontend redesign went to a separate branch and worktree and was opened as PR #13 and merged at the owner's request after all checks passed (`2476934`). It is not part of deployed revision `9cadd0b`.
+**Coordination.** The owner's README PR (#12) was merged after all its checks passed on the updated head, and its README is now the source of truth here. The frontend redesign went to a separate branch and worktree and was opened as PR #13 and merged at the owner's request after all checks passed (`2476934`), then released through the gated chain and deployed (`136ee89`); all live suites passed again.
 
 **Open (owner).**
 - Grant reviewer repository access.
 - Check Render free hours and Supabase inactivity during the live week.
 - Dependabot PR #11.
-- Decide whether to release the merged redesign to the live site (that requires a new gated release and live re-verification).

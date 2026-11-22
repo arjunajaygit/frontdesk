@@ -11,7 +11,7 @@ are documentation only unless noted).
 | H02 Stale tabs and cross-identity retries | HIGH | FIXED AND VERIFIED |
 | H03 Unverified artifact publication and signing | HIGH | FIXED AND VERIFIED (remote release runs 44995728324 and 45017938581; deployed digest signature + SBOM attestation also verified independently with cosign) |
 | H04 Confidential materials in Git history | HIGH (publication) | FIXED AND VERIFIED (sanitized history published to the private repository; Gitleaks full-history gate passes on every push) |
-| H05 Hosted submission incomplete | HIGH | VERIFIED: live deployment passed the deployed gates (docs/M8_DEPLOYMENT_EVIDENCE.md). Remaining: reviewer repository access (owner action); cold start UNKNOWN |
+| H05 Hosted submission incomplete | HIGH | VERIFIED: live deployment passed the deployed gates (docs/M8_DEPLOYMENT_EVIDENCE.md). Remaining: reviewer repository access (owner action); cold start measured once (≈ 39 s) |
 | M01 Shared-IP rate limiting | MEDIUM | FIXED AND VERIFIED |
 | M02 Concurrent seed credential consistency | MEDIUM | FIXED AND VERIFIED |
 | M03 Scheduler shutdown ordering | MEDIUM | FIXED AND VERIFIED |

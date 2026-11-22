@@ -675,6 +675,7 @@ frontdesk/
 
 **Known limits:** In-process rate limiting is designed for a single instance; full-text search and aggregate ticket counts are not available. Email delivery/read receipts are not implemented. Automated accessibility checks are not a manual screen-reader audit or WCAG certification. Monitoring definitions do not prove that notifications are delivered. Free hosting cannot promise uninterrupted availability or precise sweep times; high availability, full disaster recovery and backup/restore timing must not be assumed demonstrated.
 
+This repository is a **sanitized publication snapshot**. Private assessment documents, agent instructions and sensitive local credentials are intentionally excluded. See [PROVENANCE.md](PROVENANCE.md). Preserve real test and release evidence rather than deleting it simply to make the repository appear smaller.
 
 ## Further reading
 

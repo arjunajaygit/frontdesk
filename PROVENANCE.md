@@ -2,9 +2,9 @@
 
 This repository is a sanitized publication snapshot of the private development repository.
 
-- Source revision: `fa94fbc592c269b6c31d4f6bdf7c517288445dfc`
-- Snapshot created: 2026-11-22T12:25:48Z
-- Method: `git archive fa94fbc592c269b6c31d4f6bdf7c517288445dfc` minus the paths below (scripts/build-publication.sh); the private history is not published.
+- Source revision: `647eb0fa2126bbe16d840e15d878b047580cd3e7`
+- Snapshot created: 2026-11-22T13:02:36Z
+- Method: `git archive 647eb0fa2126bbe16d840e15d878b047580cd3e7` minus the paths below (scripts/build-publication.sh); the private history is not published.
 - Release checks (CI, Security, release gate) run against THIS repository's own commit SHAs.
 
 ## Withheld paths

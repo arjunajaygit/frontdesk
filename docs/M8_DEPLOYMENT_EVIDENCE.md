@@ -8,22 +8,22 @@ simulated. Anything that could not be measured is marked **UNKNOWN**.
 | Item | Value |
 |---|---|
 | Repository | https://github.com/arjunajaygit/frontdesk (private; sanitized publication history; see PROVENANCE.md) |
-| Released source revision | `9cadd0b78daccc81f7ae145572a5c6a968a85cff` (publication repo) = sanitized snapshot of private development revision `af87892` |
-| CI (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45017605776: success (static, unit, PostgreSQL integration incl. PROOF-01..05, Playwright, Docker amd64 smoke/k6/ZAP, release gate) |
-| Security (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45017605825: success (Gitleaks full history, Semgrep, npm audit gate + SBOM, Trivy) |
+| Released source revision | `136ee894b9724655a09f54dded6782047368ebef` (publication repo) = sanitized snapshot of private development revision `fa94fbc` (includes the merged UI redesign, PR #13) |
+| CI (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45022244966: success (static, unit, PostgreSQL integration incl. PROOF-01..05, Playwright, Docker amd64 smoke/k6/ZAP, release gate) |
+| Security (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45022245000: success (Gitleaks full history, Semgrep, npm audit gate + SBOM, Trivy) |
 | CodeQL | Skipped while the repository is private (code scanning on private repositories is a paid GitHub feature). Semgrep is the mandatory SAST gate. |
-| Release workflow | https://github.com/arjunajaygit/frontdesk/actions/runs/45017938581: success. Steps: gate (main, exact SHA, passing CI + Security) → one linux/amd64 build → smoke → Trivy gate → SBOM → publish → pull back → config-digest match → keyless sign + CycloneDX attestation → both verified against the exact workflow identity |
-| Registry manifest digest (deployed) | `ghcr.io/arjunajaygit/frontdesk@sha256:b5ef0a7f9d4eed565295286f7385bd342dc324531368ddfabd1924dafa5cd9da` (private GHCR package) |
-| Config digest (tested image) | `sha256:51c76eb24149ea2ce4f723c726a5c13f5185c2683e969e6401ddda67139177f2` (equal to the pulled-back image) |
+| Release workflow | https://github.com/arjunajaygit/frontdesk/actions/runs/45022802427: success. Steps: gate (main, exact SHA, passing CI + Security) → one linux/amd64 build → smoke → Trivy gate → SBOM → publish → pull back → config-digest match → keyless sign + CycloneDX attestation → both verified against the exact workflow identity |
+| Registry manifest digest (deployed) | `ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980c77af19523f747f2e298c7fb8f72d8619e76c0eec3ee40772a4a9f33` (private GHCR package) |
+| Config digest (tested image) | `sha256:fd1ecc8c3655a79cd777edb044314f6d2d1de595ab472cf299bd265c0e279fed` (equal to the pulled-back image) |
 | Independent signature check | Run locally with cosign: `cosign verify` and `cosign verify-attestation --type cyclonedx`. Identity `https://github.com/arjunajaygit/frontdesk/.github/workflows/release.yml@refs/heads/main`, issuer `https://token.actions.githubusercontent.com`. Both passed (claims validated, transparency-log inclusion verified, certificate chain verified). |
 | Live URL | https://frontdesk-arvo-support.onrender.com (Render Free, Singapore) |
-| Render deploy | `dep-dc1dkbajnfac738g25hg`, image `sha256:b5ef0a7f…`, live at 12:04 UTC |
-| Deployed revision check | `GET /api/healthz` → `{"ok":true,"commit":"9cadd0b78daccc81f7ae145572a5c6a968a85cff"}` |
+| Render deploy | `dep-dc1e4m4s728c73c6lpr0`, image `sha256:ebf7a980…`, live at 12:40 UTC |
+| Deployed revision check | `GET /api/healthz` → `{"ok":true,"commit":"136ee894b9724655a09f54dded6782047368ebef"}` |
 | Database | Supabase Free project `frontdesk` (ap-southeast-1), PostgreSQL 17.12, IPv4 session pooler |
 
-**Previous deployment.** Revision `a577264` with digest `sha256:681c5e31…be247c` (CI 44995365902, release 44995728324). It was replaced because:
-- the empty-page-scroll fix had to ship;
-- database TLS verification was missing (see below).
+**Previous deployments (same day).**
+- `9cadd0b`, digest `b5ef0a7f…`: CI 45017605776, Security 45017605825, release 45017938581, deploy `dep-dc1dkbajnfac738g25hg` at 12:04. It introduced strict database TLS and the scroll fix, passed every live suite below, and was replaced only to ship the merged redesign.
+- `a577264`, digest `681c5e31…be247c`: CI 44995365902, release 44995728324. It was replaced to ship the scroll fix and database TLS verification.
 
 **Earlier CI failures.** Failed CI runs on the same repository (first pushes) and their root causes are recorded in `docs/IMPLEMENTATION_NOTES.md`. None was bypassed. One Security run, on `983a631`, failed correctly: Semgrep blocked `rejectUnauthorized: false` in two new hosted-verification scripts. The fix is the next section, not a suppression.
 
@@ -46,7 +46,7 @@ simulated. Anything that could not be measured is marked **UNKNOWN**.
 
 ## Pre-deployment residual-risk re-scan (exact manifest, refreshed DB)
 
-I ran a Trivy 0.76.2 remote scan of `ghcr.io/arjunajaygit/frontdesk@sha256:b5ef0a7f…` (DB updated 2026-11-21 18:38 UTC, the latest published at scan time):
+I ran a Trivy 0.76.2 remote scan before each deploy, for `b5ef0a7f…` and again for `ebf7a980…` (DB updated 2026-11-21 18:38 UTC, the latest published at scan time):
 - 38 HIGH/CRITICAL package findings, across the same 11 advisories the owner conditionally accepted;
 - no new advisory, none removed, no fix available;
 - 0 npm, secret or misconfiguration findings.
@@ -74,7 +74,7 @@ The acceptance conditions (no new high/critical, no applicability change, no ava
 
   Credentials exist only in the git-ignored `.local/credentials.hosted.json` (0600) and are delivered through a private channel.
 
-## Deployed application checks (public HTTPS, revision `9cadd0b`)
+## Deployed application checks (public HTTPS; identical results on `9cadd0b` and on the current `136ee89`)
 
 | Suite | Result |
 |---|---|
@@ -112,21 +112,32 @@ The endpoint runs the same fenced, idempotent sweep as the in-process scheduler,
 |---|---|---|---|---|
 | 11:30 | succeeded | **200**, not timed out; body = sweep result | `SYSTEM:-:ext-cron-202611221130`, SYSTEM, COMPLETED | nothing due (processed 0), which is correct |
 | 12:00 | succeeded | **200**, not timed out | `SYSTEM:-:ext-cron-202611221200`, SYSTEM, COMPLETED | nothing due (processed 0), which is correct |
-| 12:30 | _see "Cron-attributed auto-close" below_ | | | |
+| 12:30 | succeeded (12:30:00.14) | **200**, not timed out; **instance was asleep**, request answered after the cold start | `SYSTEM:-:ext-cron-202611221230`, SYSTEM, COMPLETED, started 12:30:38.73, finished 12:30:38.86 | nothing due (processed 0); see cold start below |
+| 13:00 | succeeded (13:00:00.16) | **200**, not timed out | `SYSTEM:-:ext-cron-202611221300`, SYSTEM, COMPLETED, started 13:00:00.49, **processed 1, autoClosed 1** | the verification ticket was **closed by this cron call** (see below) |
 
-**Cron-attributed auto-close (persisted business processing).** The in-process scheduler fires at a fixed phase. After the 12:04 restart that phase is `hh:mm:31`. The test:
-1. At 12:29:45, immediately after the 12:29:31 in-process sweep, the verification ticket's stored deadlines are moved into the past (the same technique the integration tests use).
-2. The 12:30:00 cron call is then the first sweeper to see the ticket, 31 s before the next in-process run.
-3. The closing `TICKET_CLOSED` audit event is attributed through its correlation ID to the `SWEEP_STARTED` event of the `ext-cron-202611221230` invocation.
+**Cron-attributed auto-close (persisted business processing): VERIFIED at the 13:00 slot.** The in-process scheduler fires at a fixed phase per instance, so the test was timed around it:
+- *12:30 attempt, correctly skipped:* the instance was asleep and the phase could not be confirmed, so the safety check refused to move the deadline. That slot became the cold-start measurement below.
+- *13:00 attempt:*
+  - At 12:59:00 the instance was awake, with in-process sweeps at `hh:mm:19`.
+  - At 12:59:24.7, after the 12:59:19 sweep, the verification ticket's stored waiting deadline was moved into the past (the technique the integration tests use).
+  - At 13:00:00.49 the cron invocation started, processed 1 ticket and auto-closed 1.
+  - At 13:00:00.62 `TICKET_CLOSED` (`AUTO_CLOSED_NO_REPLY`) was recorded. Its correlation ID resolves to the `SWEEP_STARTED` event of `SYSTEM:-:ext-cron-202611221300`.
+  - The next in-process sweep ran at 13:00:19, after the close.
+- *Conclusion:* the external trigger's HTTP call performs real, persisted lifecycle work as the SYSTEM actor.
 
-The result is recorded in the next subsection.
-
-**Cold start: UNKNOWN.**
-- *Spin-down was observed* on the previous instance: an 11,996 s gap in in-process sweeps (07:42 → 11:01 UTC), then a new instance whose process started at 11:01:27.69Z.
-- *What woke it is unknown* (Render does not log static/SPA requests or health checks), so the true cold-start duration is unknown.
-- *Image re-pull on wake is unknown:* Render's event log shows no pull events, and Render documents that free instances do not keep previously pulled images.
-- *Between 11:30 and 12:04 the instance stayed awake* (an in-process sweep every minute). The source of inbound traffic in that window is unknown. Because of that, the 11:30 and 12:00 slots exercised a warm instance, not a cold one.
-- *Implication:* the cron's 120 s timeout is designed to cover a cold start, but no cron call against a sleeping instance has yet been observed.
+**Cold start: MEASURED (one sample, 2026-11-22 12:30 UTC).**
+- *The instance was asleep.* The last in-process sweep ran at 12:21:31 (about 15 minutes after the last inbound request, at about 12:07), and Render logged nothing between 12:21:31 and 12:30:33.
+- *The wake:*
+  - 12:30:00.14: the cron sends the request.
+  - 12:30:33.2: a new instance (`…-hss86`, previously `…-54mm6`) logs "Starting Nest application", after **≈ 33 s** of platform resume.
+  - 12:30:38.73: the app starts the sweep (app boot + DB connect ≈ 5.5 s).
+  - 12:30:38.86: the sweep finishes and returns **HTTP 200**.
+- *Total:* **≈ 38.6 s** from request to response, inside the 120 s pg_net timeout. The invocation persisted as SYSTEM COMPLETED.
+- *Caveats:*
+  - pg_net's `net._http_response.created` holds the request time, not the response time, so the measurement uses the app's own `startedAt` together with Render's log timestamps.
+  - This is one sample, not a distribution.
+  - Whether the image was re-pulled on wake is still **UNKNOWN** (Render logs no pull events).
+- *Earlier spin-down on the previous instance:* an 11,996 s gap in in-process sweeps (07:42 → 11:01 UTC), woken by an unknown source.
 
 **Lateness bound.** Lateness and breaches are computed from stored timestamps, so they are correct whenever they are read. While the instance sleeps, persisted effects (breach events, auto-close, reopen-window expiry) can be applied up to about 30 minutes late, plus any wake time. They are still applied only strictly after the cutoff.
 
@@ -152,7 +163,7 @@ Supabase Cron runs inside the database project at no extra cost and keeps the to
 
 - **Dependabot:** 8 of the original PRs were closed by Dependabot itself and 1 (#6, not security-relevant) by me under the owner's authorization. PR #11 (grouped GitHub Actions bumps, opened after the authorization) is left open for the owner. Vulnerability alerts are enabled.
 - **PR #12** (the owner's README) was merged after all required checks passed on its updated head. Its README is now the source of truth in the private repository.
-- **PR #13** (frontend redesign) was merged at the owner's request after all required checks passed (merge commit `2476934`). It is **not** part of the deployed revision `9cadd0b` until a new release is built, scanned, signed, deployed and re-verified.
+- **PR #13** (frontend redesign) was merged at the owner's request after all required checks passed (merge commit `2476934`). It was then released through the full gated chain and is live in `136ee89`.
 
 ## Verification commands (reproducible)
 
@@ -160,7 +171,7 @@ Supabase Cron runs inside the database project at no extra cost and keeps the to
 # Deployed revision
 curl -s https://frontdesk-arvo-support.onrender.com/api/healthz
 # Signature + SBOM attestation of the deployed digest
-D=ghcr.io/arjunajaygit/frontdesk@sha256:b5ef0a7f9d4eed565295286f7385bd342dc324531368ddfabd1924dafa5cd9da
+D=ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980c77af19523f747f2e298c7fb8f72d8619e76c0eec3ee40772a4a9f33
 ID=https://github.com/arjunajaygit/frontdesk/.github/workflows/release.yml@refs/heads/main
 cosign verify --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$D"
 cosign verify-attestation --type cyclonedx --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$D"

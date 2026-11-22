@@ -1,7 +1,7 @@
 # Submission note
 
 **Live:** https://frontdesk-arvo-support.onrender.com (Render Free + Supabase Free, synthetic data only). It runs revision
-`9cadd0b` from the signed image `ghcr.io/arjunajaygit/frontdesk@sha256:b5ef0a7f…`. **Repository:** the private
+`136ee89` (including the redesigned UI) from the signed image `ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980…`. **Repository:** the private
 https://github.com/arjunajaygit/frontdesk. Reviewer access and demo accounts are granted through a private channel.
 Start with `docs/REVIEWER_WALKTHROUGH.md`. All deployment evidence is in `docs/M8_DEPLOYMENT_EVIDENCE.md`.
 
@@ -21,7 +21,7 @@ Start with `docs/REVIEWER_WALKTHROUGH.md`. All deployment evidence is in `docs/M
 - *Final audit:* all ten findings are reconciled in `docs/FINAL_AUDIT_RECONCILIATION.md`.
 
 **Deliberately not done / limits.**
-- *Cold start is UNKNOWN.* Free hosting sleeps when idle and the true wake time was not measured. While asleep, Supabase Cron calls the authenticated sweep every 30 minutes (each slot verified at the HTTP and database level). Persisted SLA effects can therefore land up to about 30 minutes late; lateness itself is always computed from stored timestamps.
+- *Free hosting sleeps when idle.* One measured cold start: about 39 s from request to response (a single sample). While asleep, Supabase Cron calls the authenticated sweep every 30 minutes (each slot verified at the HTTP and database level; one slot verifiably auto-closed an overdue ticket). Persisted SLA effects can therefore land up to about 30 minutes late; lateness itself is always computed from stored timestamps.
 - *Database TLS:* the runtime verifies the pooler certificate strictly. The one-time provisioning, migrations and seed ran encrypted but unverified.
 - *Residual image findings:* 38 Debian OS-package findings (11 advisories) have no upstream fix. They are accepted conditionally by the owner for this temporary deployment.
 - *Security tooling gaps:* CodeQL is skipped on the private repository (paid feature for private repos), so Semgrep is the SAST gate. ZAP runs as a passive baseline only, with no authenticated or active scan of the hosted demo.
