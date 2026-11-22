@@ -12,6 +12,7 @@ Frontdesk gives customers one place to ask for help and gives support agents a s
 
 - [What Frontdesk does](#what-frontdesk-does)
 - [Features](#features)
+- [How to use the app](#how-to-use-the-app-beginners-guide)
 - [Architecture diagrams](#architecture-diagrams)
 - [Technology](#technology)
 - [Run locally](#run-locally)
@@ -76,6 +77,158 @@ Working hours are **Monday–Friday, 09:30–18:30 Asia/Kolkata (IST)**, excludi
 **Example:** An urgent ticket opened on Friday at 18:00 has a resolution deadline of **Friday 18:30**. Its first-response deadline can be on Monday. These are separate clocks; one does not override the other.
 
 Only a public staff reply counts as the first response. An internal note does not. A public request for information can pause the resolution clock until the customer replies. Waiting-ticket auto-close applies strictly after **2,700 working minutes** of inactivity. Resolved tickets can be reopened for **seven calendar days inclusive**. Changing priority recalculates deadlines based on time **already used**, not from zero. Exact rules and edge cases: [Domain contract](docs/DOMAIN_CONTRACT.md).
+
+## How to use the app (beginner's guide)
+
+**You do not need to understand the code to use Frontdesk.** This section explains what to click in the website, whether you are a customer or a support agent. It describes the frontend currently implemented in `apps/web`.
+
+### First visit: open the website and sign in
+
+1. Open the [hosted Frontdesk demo](https://frontdesk-arvo-support.onrender.com), or `http://localhost:5173` if you followed [Run locally](#run-locally).
+2. On the **Sign in** page, enter your **Email** and **Password**, then select **Sign in**.
+3. The application opens the correct area for your account:
+   - **Customer** → **Support portal** (`/portal`).
+   - **Agent / Lead / Admin** → **Staff workspace** (`/staff`).
+4. Use **Sign out** when you are finished.
+
+**Where do I get an account?** This demo does **not** have a public self-registration form. A project owner/reviewer provides the hosted credentials privately. For a local demo, run `npm run demo:db` and read `.local/credentials.frontdesk_demo.json` on **your own computer**. Never post passwords in an issue, screenshot, README or commit.
+
+**If the website takes a while to open:** A free Render instance may have gone to sleep and may need time to restart. Wait for the actual page response before retrying. If your session has expired, sign in again.
+
+### A. Customer guide — ask for help and follow a ticket
+
+**1. See your tickets**
+
+After signing in as a customer, you arrive at **Your tickets**. This is a list of your requests, showing their subject and status. Select a ticket to read its public conversation. If there are more items, select **Load more tickets**.
+
+**2. Create a request**
+
+1. Select **New ticket** (top of the customer portal).
+2. Fill in **Subject** — a short name such as "Cannot access my account".
+3. Fill in **What do you need help with?** — explain the problem, including useful details.
+4. Under **How urgent is this for you?**, optionally choose **Urgent**, **Medium**, **Low** or leave **No preference**. This is your *requested* priority; support staff confirm the actual priority.
+5. Select **Create ticket**. The new ticket opens automatically.
+
+**3. Read and reply**
+
+Open a ticket from **Your tickets** to see its messages. Type in the **Reply** box and select **Send reply**. If the conversation is long, choose **Load older messages**. You can see public staff replies and information requests, but **not** internal staff notes.
+
+**4. Respond when staff ask for information**
+
+When an agent sends **Request information**, reply with the missing details. If the ticket is still in its waiting window, your reply returns it to **In progress** and the resolution clock resumes. The app does not send an email notification as part of this feature; check the portal itself.
+
+**5. Reopen or create a follow-up**
+
+- If your ticket says **Resolved** and the seven-calendar-day reopen window is still open, enter why you still need help and select **Reopen ticket**. The same ticket resumes.
+- If the reopen window expired, or the ticket is **Closed**, type a message and select **Create follow-up ticket** (or the equivalent reopen action on an expired resolved ticket). The system creates a **new linked ticket** so the older history remains intact.
+
+**6. Download a conversation**
+
+Inside a ticket, under **Download this conversation**, select **JSON** or **CSV**. The export contains customer-visible conversation information, not internal staff notes.
+
+### B. Agent guide — work on tickets
+
+The **Staff workspace** has a navigation panel on the left, a ticket list, and a ticket detail/conversation view. On smaller screens, open the **menu** to change views and use **Back to list** to return from a ticket.
+
+**1. Learn the sidebar**
+
+| Sidebar option | What you will find |
+| --- | --- |
+| **All tickets** | All tickets available to the support team, newest first. |
+| **My tickets** | Tickets assigned to you. |
+| **Unassigned** | New tickets nobody has claimed yet. |
+| **Breached** | Tickets with an overdue response or resolution clock. |
+| **Waiting on customer** | Tickets paused while awaiting a customer reply. |
+| **Resolved** | Tickets marked resolved, with a limited customer reopen window. |
+| **Closed** | Tickets that have been closed or expired. |
+
+Use **Filter by priority** to show only Urgent, Medium or Low. Select a ticket row to open it. The refresh icon reloads the list; **Load more tickets** shows additional records.
+
+**2. Claim a ticket**
+
+1. Select **Unassigned** in the sidebar.
+2. Open a ticket and read its subject, original request and SLA information.
+3. Select **Claim ticket**.
+4. After a successful claim, it belongs to you and appears in **My tickets**. You can now reply and perform authorized actions.
+
+If another agent claims the same ticket first, you will see a conflict message telling you that the ticket was already claimed. **Only the assigned agent can change that ticket or send staff messages**; other staff can view permitted information but cannot take over silently.
+
+**3. Understand the ticket detail screen**
+
+The top area shows the ticket reference, **priority**, **status**, customer request, assigned agent, and creation/update times. Below it are **Response** and **Resolution** SLA cards. These show separate deadlines and whether each clock is running, paused, completed or overdue.
+
+Use **Conversation** to read messages, or **SLA history & audit** to see recorded actions, time changes and breaches. The **Load older messages** button retrieves earlier conversation items. Timestamps display in IST.
+
+**4. Send a public reply, private note, or information request**
+
+At the bottom of a ticket you own, choose the intended message type **before** typing:
+
+| Message mode | Button | Who can see it? | Effect |
+| --- | --- | --- | --- |
+| **Public reply** | **Send public reply** | Customer and staff | The first qualifying public reply completes the initial response clock. |
+| **Internal note** | **Add internal note** | Staff only | No SLA clock is completed or paused. |
+| **Request information** | **Send request & wait** | Customer and staff | Requests an answer, puts the ticket into **Waiting** and pauses the resolution clock. |
+
+The modes keep **separate drafts**, so switching from a private note to a public reply does not send your note as a public message. You can also use **Ctrl + Enter** (Windows/Linux) or **⌘ + Enter** (Mac) to send the currently selected message type.
+
+While a ticket is **Waiting**, the assigned agent can add internal notes, but cannot send another ordinary public reply or information request from that composer until the customer responds.
+
+**5. Change priority**
+
+Open an **In progress** or **Waiting** ticket assigned to you. Choose a new value in **Ticket priority**, then select **Apply priority**. Both SLA calculations use time already consumed. **Changing priority does not restart the clocks**; the audit history records the change.
+
+**6. Resolve a ticket**
+
+For an assigned **In progress** ticket, select **Resolve…**, optionally write a customer-visible resolution message, and select **Resolve ticket**. If no public reply has been sent yet, a **resolution message is required** so the first-response requirement is not bypassed. The ticket moves to **Resolved**; the customer can reopen it within seven calendar days.
+
+**7. Record a ticket for a customer**
+
+Select **New ticket** at the top of the staff sidebar. Choose an existing **Customer**, enter a **Subject**, type the **Customer's request**, choose a **Priority**, then select **Create ticket**. This records the original customer request; it is **not** counted as a support reply. The created ticket opens automatically.
+
+### C. Support lead / admin guide — run a manual sweep
+
+A support lead or admin sees an **Administration → Run SLA sweep** action in the staff sidebar. Open it and select **Run sweep now**. The dialog shows the number of tickets processed, auto-closed, expired, breaches recorded and failures.
+
+A sweep processes **only work that is actually due**. It does not simulate passing time or close arbitrary tickets. If the result says more work remains due, run it again. Normal agents and customers **do not** have this control. The background scheduler aims to do the same work automatically, subject to the hosting limitations described under [Deploy](#deploy).
+
+### Ticket statuses explained
+
+| Status shown | Meaning | What usually happens next |
+| --- | --- | --- |
+| **Open** | New ticket, not yet claimed. | An agent selects **Claim ticket**. |
+| **In progress** | An agent is working on it. | Agent replies, requests information or resolves. |
+| **Waiting on customer** | Agent asked for more information. | Customer replies; resolution SLA is paused meanwhile. |
+| **Resolved** | Agent finished the issue. | Customer accepts the outcome or reopens within the allowed window. |
+| **Closed** | Inactivity/expiry cutoff passed. | Future contact creates a linked follow-up ticket. |
+
+**Priority versus status:** *Urgent / Medium / Low* describes how quickly the team should respond and resolve. *Open / In progress / Waiting / Resolved / Closed* describes where the ticket is in its workflow. They are different things.
+
+### Example: try Frontdesk end to end
+
+Here is a practical walkthrough using **sample data**, not a real customer's personal information:
+
+1. **Customer:** Sign in and create a ticket with subject **"Cannot sign in"**, explaining the issue.
+2. **Agent:** Sign in using a **different browser profile**, go to **Unassigned**, open that ticket, and select **Claim ticket**.
+3. **Agent:** Choose **Public reply**, write **"I am checking your account issue."**, and select **Send public reply**.
+4. **Agent:** Choose **Request information**, ask for more details, and select **Send request & wait**.
+5. **Customer:** Open the same ticket in the portal and select **Send reply** with the requested details.
+6. **Agent:** Return to **My tickets**. Open the ticket, review the new reply and add an **Internal note** if needed.
+7. **Agent:** Select **Resolve…**, enter the solution, and select **Resolve ticket**.
+8. **Customer:** Open the resolved ticket. If the problem persists, select **Reopen ticket** within the seven-day window.
+9. **Agent:** Open **SLA history & audit** to see the recorded transitions and deadline information.
+
+**Tip for reviewers:** To test the predefined historical proof scenarios, follow the [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md). It explains which sample tickets demonstrate breaches, claim races and privacy behavior without changing the system clock.
+
+### Questions new users often ask
+
+- **Can I sign up myself?** Not through the current UI. Use an account supplied by the operator or a local generated demo account.
+- **Why is the Reply button missing or disabled?** Only the assigned agent can write to an active staff ticket. Claim an unassigned ticket or open one already assigned to you.
+- **Can customers read internal notes?** No. The customer API and exports only return permitted public data.
+- **Why did the response clock finish but resolution is still running?** A public staff reply satisfies the first-response requirement; solving the issue has a different deadline.
+- **Why can’t I see an email notification?** Frontdesk records messages in the web portal; email sending is not implemented.
+- **Why are displayed times in IST?** The configured business calendar uses Asia/Kolkata. Weekends and configured holidays do not count toward working-time SLAs.
+- **Why did a follow-up have a different ticket reference?** Once the old ticket can no longer be reopened, new contact becomes a **linked new ticket** to preserve the original history.
+- **Why am I signed in as a different user in another tab?** Tabs in the same browser profile share cookies. Use different browser profiles or private contexts when comparing customer and agent views.
 
 ## Architecture diagrams
 
