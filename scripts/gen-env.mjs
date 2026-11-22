@@ -1,12 +1,8 @@
 // Generates a git-ignored .env with independent random secrets. Refuses to overwrite.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
 const target = new URL('../.env', import.meta.url);
-if (existsSync(target)) {
-  console.log('.env already exists; leaving it untouched.');
-  process.exit(0);
-}
 const hex = (n) => randomBytes(n).toString('hex');
 const pw = () => randomBytes(24).toString('base64url');
 const v = {
@@ -23,5 +19,16 @@ text = text
   .replace('POSTGRES_BOOTSTRAP_PASSWORD=REPLACE_ME', `POSTGRES_BOOTSTRAP_PASSWORD=${v.boot}`)
   .replace('FRONTDESK_OWNER_PASSWORD=REPLACE_ME', `FRONTDESK_OWNER_PASSWORD=${v.owner}`)
   .replace('FRONTDESK_APP_PASSWORD=REPLACE_ME', `FRONTDESK_APP_PASSWORD=${v.app}`);
-writeFileSync(target, text, { mode: 0o600 });
+// No existence pre-check: 'wx' (exclusive create) IS the check. It fails if any file or symlink is already there,
+// so an existing .env is never overwritten and secrets are never written through a planted path
+// (CodeQL js/file-system-race).
+try {
+  writeFileSync(target, text, { mode: 0o600, flag: 'wx' });
+} catch (e) {
+  if (e.code === 'EEXIST') {
+    console.log('.env already exists; leaving it untouched.');
+    process.exit(0);
+  }
+  throw e;
+}
 console.log('.env written (mode 600). Secrets are not printed.');

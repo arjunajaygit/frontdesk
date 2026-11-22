@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { closeSync, existsSync, fstatSync, openSync, readFileSync, rmSync } from 'node:fs';
 import * as argon2 from 'argon2';
 import { Client } from 'pg';
 import { credentialsFileFor, writeCredentials } from '../../prisma/credentials';
@@ -53,8 +53,15 @@ describe('seed credential recording (real PostgreSQL)', () => {
     const run = seed();
     expect(run.status).toBe(0);
     expect(run.stdout + run.stderr).not.toMatch(/"[A-Za-z0-9_-]{20}"/); // generated passwords are never printed
-    expect(statSync(file).mode & 0o777).toBe(0o600);
-    const recorded = JSON.parse(readFileSync(file, 'utf8')) as Record<string, string>;
+    // Mode check and content read through ONE descriptor (the file inspected is the file read).
+    const fd = openSync(file, 'r');
+    let recorded: Record<string, string>;
+    try {
+      expect(fstatSync(fd).mode & 0o777).toBe(0o600);
+      recorded = JSON.parse(readFileSync(fd, 'utf8')) as Record<string, string>;
+    } finally {
+      closeSync(fd);
+    }
     const users = (await c.query(`SELECT email, "passwordHash" h FROM "User" ORDER BY email`)).rows;
     expect(users).toHaveLength(AGENTS.length + CUSTOMERS.length);
     expect(Object.keys(recorded).sort()).toEqual(users.map((u) => u.email).sort());

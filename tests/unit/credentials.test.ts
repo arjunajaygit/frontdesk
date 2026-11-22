@@ -53,7 +53,7 @@ describe('credential file safety (M5 overwrite incident)', () => {
     } catch (e) {
       expect(String((e as Error).message)).not.toContain('SUPER-SECRET-VALUE');
     }
-    const outside = path.join(tmpdir(), 'elsewhere.json');
+    const outside = path.join(mkdtempSync(path.join(tmpdir(), 'fd-outside-')), 'elsewhere.json'); // private dir, not a predictable /tmp name
     writeFileSync(outside, '{}');
     expect(() => writeCredentials(outside, { 'a@x.example': 'x' }, false, base)).toThrow(/under/);
   });
