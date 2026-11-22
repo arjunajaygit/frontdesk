@@ -10,6 +10,7 @@ import {
 import { PgSweepStore } from '../../apps/api/src/infrastructure/sweep/pg-sweep-store';
 import { aggregateFromRows } from '../../apps/api/src/infrastructure/persistence/ticket-mapper';
 import { connect, roleUrl, SEED_ANCHOR } from '../helpers/db';
+import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 import { loadSpec, makeValidator } from '../helpers/openapi';
 
 /**
@@ -21,17 +22,22 @@ let db: PrismaClient;
 let store: PgSweepStore;
 let owner: Client;
 let lead: { type: 'LEAD'; id: string };
+let dbName: string;
 
 beforeAll(async () => {
-  db = new PrismaClient({ datasources: { db: { url: roleUrl('app') } } });
+  // Own clone: reserving invocations writes SWEEP_* audit rows, which must never leak into the shared template
+  // (the seed suite asserts the template holds only seeded events — CI suite order exposed this).
+  dbName = await cloneTemplate('sweepstore');
+  db = new PrismaClient({ datasources: { db: { url: roleUrl('app', dbName) } } });
   store = new PgSweepStore(db);
-  owner = await connect('owner');
+  owner = await connect('owner', dbName);
   const r = await owner.query(`SELECT id FROM "User" WHERE role='LEAD' LIMIT 1`);
   lead = { type: 'LEAD', id: r.rows[0].id };
 });
 afterAll(async () => {
   await db.$disconnect();
   await owner.end();
+  await dropDatabase(dbName);
 });
 
 async function pureCandidates(snapshot: number): Promise<SweepCandidate[]> {

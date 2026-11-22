@@ -122,6 +122,29 @@ check(
   'cookies set: access/refresh/csrf',
   ['frontdesk_access', 'frontdesk_refresh', 'frontdesk_csrf'].every((c) => ok.jar.has(c)),
 );
+// Cookie attributes as actually sent (all origins), plus Secure + HSTS when served over HTTPS (hosted deployment).
+const setCookies = loginRes.headers.getSetCookie?.() ?? [];
+const attrsOk = (name, extra = []) => {
+  const c = setCookies.find((x) => x.startsWith(`${name}=`)) ?? '';
+  return [/;\s*HttpOnly/i, /;\s*SameSite=Lax/i, ...extra].every((re) => re.test(c));
+};
+const httpsTarget = BASE.startsWith('https://');
+const secure = httpsTarget ? [/;\s*Secure/i] : [];
+check(
+  `access/refresh/csrf cookies HttpOnly + SameSite=Lax${httpsTarget ? ' + Secure' : ''}`,
+  ['frontdesk_access', 'frontdesk_refresh', 'frontdesk_csrf'].every((n) => attrsOk(n, secure)),
+);
+check(
+  'refresh cookie scoped to /api/auth',
+  /;\s*Path=\/api\/auth/i.test(setCookies.find((x) => x.startsWith('frontdesk_refresh=')) ?? ''),
+);
+if (httpsTarget) {
+  const h = await fetch(BASE + '/api/healthz');
+  check(
+    'HSTS on HTTPS responses',
+    /max-age=\d+/.test(h.headers.get('strict-transport-security') ?? ''),
+  );
+}
 const rawLogin = await fetch(BASE + '/api/auth/csrf');
 check('csrf endpoint is no-store', rawLogin.headers.get('cache-control') === 'no-store');
 const list = await ok.req('/api/tickets?limit=5');

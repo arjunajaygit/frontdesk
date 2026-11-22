@@ -1,5 +1,5 @@
 import { Client } from 'pg';
-import { connect } from '../helpers/db';
+import { connect, roleUrl } from '../helpers/db';
 import { Browser, conforms, newKey, signedIn, start, startApp, TestApp } from '../helpers/http';
 import { LockHolder, Observer } from '../helpers/observe';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
@@ -34,7 +34,12 @@ let customer: Browser;
 
 beforeAll(async () => {
   db = await cloneTemplate('proof02');
-  t = await startApp(db, { DB_LOCK_TIMEOUT_MS: '20000' }); // barrier may be held while 9 waiters are observed
+  // Explicit pool: Prisma's default (2 x CPUs + 1) is only 5 on a 2-vCPU CI runner, which would queue contenders in
+  // the app instead of letting all nine reach the PostgreSQL row lock this proof observes.
+  t = await startApp(db, {
+    DB_LOCK_TIMEOUT_MS: '20000',
+    DATABASE_URL: `${roleUrl('app', db)}?connection_limit=20`,
+  }); // barrier may be held while 9 waiters are observed
   owner = await connect('owner', db);
   observer = await Observer.open(db);
   agents = await Promise.all(STAFF.map((e) => signedIn(t, e)));
