@@ -25,6 +25,11 @@ async function axe(page: Page, label: string) {
   const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
   expect(bad.map((v) => `${label}: ${v.id} (${v.nodes.length}) ${v.nodes[0]?.target}`)).toEqual([]);
 }
+/** The staff workspace is an app shell: panes scroll, the document itself must never scroll (no empty page scroll). */
+const noPageScroll = async (page: Page) =>
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight),
+  ).toBeLessThanOrEqual(1);
 const noHorizontalOverflow = async (page: Page) =>
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
@@ -68,6 +73,7 @@ for (const s of sizes) {
         .first(),
     ).toBeVisible();
     await noHorizontalOverflow(page);
+    await noPageScroll(page);
     await axe(page, `staff-list-${s.name}`);
     await page.screenshot({ path: `${SHOTS}/staff-list-${s.name}.png` });
 
@@ -75,6 +81,7 @@ for (const s of sizes) {
     await expect(page.locator('#ticket-title')).toBeVisible();
     await expect(page.getByText('Internal note · team only').first()).toBeVisible();
     await noHorizontalOverflow(page);
+    await noPageScroll(page);
     await axe(page, `staff-detail-${s.name}`);
     if (!wide) await expect(page.getByRole('button', { name: 'Back to list' })).toBeVisible();
     await page.getByRole('radio', { name: 'Internal note' }).click();

@@ -45,7 +45,8 @@ export function TicketDetail({ id, onBack }: { id: string; onBack: () => void })
 
   return (
     <section aria-labelledby="ticket-title" className="flex h-full min-h-0 flex-col bg-canvas">
-      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
+      {/* relative: contain absolutely positioned descendants (sr-only labels) inside this scroller; see TicketList. */}
+      <div ref={scroller} className="relative min-h-0 flex-1 overflow-y-auto">
         <header className="border-b border-line bg-surface p-4">
           <Button size="sm" variant="ghost" className="mb-2 lg:hidden" onClick={onBack}>
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />

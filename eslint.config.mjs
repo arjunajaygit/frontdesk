@@ -27,6 +27,7 @@ export default tseslint.config(
         fetch: 'readonly',
         crypto: 'readonly',
         Response: 'readonly',
+        setTimeout: 'readonly',
       },
     },
   },
