@@ -55,7 +55,7 @@ export function LoginPage() {
         <form
           onSubmit={submit}
           aria-labelledby="signin-title"
-          className="glass-strong w-full max-w-[25rem] animate-rise-in space-y-5 rounded-xl border border-white/70 p-6 shadow-pop ring-1 ring-ink/[0.06] sm:p-7"
+          className="glass-strong w-full max-w-[25rem] space-y-5 rounded-xl border border-white/70 p-6 shadow-pop ring-1 ring-ink/[0.06] sm:p-7"
         >
           <div>
             <h1 id="signin-title" className="text-heading font-semibold tracking-[-0.01em] text-ink">

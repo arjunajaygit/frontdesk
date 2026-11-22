@@ -84,6 +84,8 @@ describe('same-origin static serving', () => {
       const r = await request(t.server).get(path);
       expect(r.headers['permissions-policy']).toMatch(/camera=\(\)/);
       expect(r.headers['permissions-policy']).toMatch(/geolocation=\(\)/);
+      // Regression: no tokens browsers do not recognise (each one logs a console warning on every page).
+      expect(r.headers['permissions-policy']).not.toMatch(/browsing-topics|interest-cohort/);
       expect(r.headers['cross-origin-embedder-policy']).toBe('require-corp');
       expect(r.headers['cross-origin-opener-policy']).toBe('same-origin');
       expect(r.headers['cross-origin-resource-policy']).toBe('same-origin');

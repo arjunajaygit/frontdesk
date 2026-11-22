@@ -9,8 +9,10 @@ test('staff can sign in, see seeded tickets, open one and sign out', async ({ pa
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByTestId('viewer-name')).toHaveText('Arjun Nair');
   const list = page.getByRole('list', { name: /All tickets tickets/ });
-  await expect(list.getByRole('link').first()).toBeVisible();
-  await list.getByRole('link').first().click();
+  // A SEEDED scenario ticket (other specs create newer tickets, so "the first row" depends on run order).
+  const seeded = list.getByRole('link', { name: /\[FD-\d{3}\]/ }).first();
+  await expect(seeded).toBeVisible();
+  await seeded.click();
   await expect(page.getByRole('heading', { level: 2, name: /\[FD-/ })).toBeVisible();
   await page.screenshot({ path: '.local/screenshots/smoke-staff.png' });
   await page.getByRole('button', { name: 'Sign out' }).click();

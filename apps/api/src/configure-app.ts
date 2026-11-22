@@ -16,8 +16,11 @@ import { requestContext } from './common/request-context';
 export const BODY_LIMIT = '64kb';
 
 /** Shared by main.ts and the HTTP test harness so tests exercise the exact production pipeline. */
+// Only widely recognised features: an unknown token (e.g. 'browsing-topics') makes browsers log a console warning on
+// EVERY page (found by scripts/hosted-runtime-health.mjs). The Topics API opt-out is moot anyway: the CSP
+// (default-src 'self') forbids the third-party scripts that would call it.
 const PERMISSIONS_POLICY =
-  'accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), browsing-topics=()';
+  'accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()';
 
 export function configureApp(app: NestExpressApplication, config: AppConfig): void {
   app.set('trust proxy', config.TRUST_PROXY_HOPS > 0 ? config.TRUST_PROXY_HOPS : false);
