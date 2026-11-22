@@ -37,6 +37,7 @@ All commands were run sequentially on the final code of branch `verify/final-ass
 | `lint` | `document`/`window` undefined in `scripts/hosted-runtime-health.mjs` | Browser-context globals inside `page.evaluate` callbacks | Declared as globals for that file | PASS |
 | Full e2e | `a11y` login: intermittent axe colour-contrast failure on the sign-in button | **Defect (determinism):** axe sampled the card during its 220 ms entrance fade | Removed the sign-in card's entrance animation | PASS (2 runs) |
 | Full e2e | `smoke` and `workflows` queue test failed | My new `assessment-flows` spec created newer and unassigned-urgent tickets, exposing a hidden run-order dependency in `smoke` ("first row is seeded") | `smoke` opens a seeded ticket explicitly; the urgent ticket from the new spec is claimed by an agent, as in real use | PASS (2 runs) |
+| CI on PR #14 (integration) | `shutdown-drain` (M03): the `shutdown:` log record was not found, although the process drained and exited by SIGTERM | **Test-harness defect (latent race):** stdout chunks were split on newlines independently, so a JSON line straddling a chunk boundary was lost; also `exit` can fire before stdio is fully read | Line assembly across chunks; wait for `close` instead of `exit` | 3 consecutive local passes; CI rerun on the PR |
 
 ## 2. Requirement-focused verification
 
