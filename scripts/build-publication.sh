@@ -5,9 +5,16 @@
 #   bash scripts/build-publication.sh [rev=HEAD] [target=../frontdesk-v3.2-publication]
 set -euo pipefail
 cd "$(dirname "$0")/.."
+UPDATE=0
+if [[ "${1:-}" == "--update" ]]; then UPDATE=1; shift; fi
 REV=$(git rev-parse "${1:-HEAD}^{commit}")
 TARGET=${2:-../frontdesk-v3.2-publication}
-if [[ -e "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then echo "refusing: $TARGET exists and is not empty"; exit 2; fi
+if [[ $UPDATE -eq 1 ]]; then
+  # Append a commit to an EXISTING publication history (already pushed): never rewrite it.
+  [[ -d "$TARGET/.git" ]] || { echo "refusing: --update needs an existing publication repository at $TARGET"; exit 2; }
+  [[ -z "$(git -C "$TARGET" status --porcelain)" ]] || { echo "refusing: $TARGET has uncommitted changes"; exit 2; }
+  find "$TARGET" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+elif [[ -e "$TARGET" ]] && [[ -n "$(ls -A "$TARGET" 2>/dev/null)" ]]; then echo "refusing: $TARGET exists and is not empty"; exit 2; fi
 mkdir -p "$TARGET"
 git archive --format=tar "$REV" | tar -x -C "$TARGET"
 EXCLUDED=()
@@ -44,13 +51,14 @@ if find . -type f \( -name '*.pdf' -o -name '.env' -o -name '.env.*' ! -name '.e
   echo "LEAK: forbidden file types present:"; find . -type f \( -name '*.pdf' -o -name '.env' -o -name '*.dump' -o -name '*.key' -o -name '*.pem' -o -name 'credentials*.json' -o -name 'cosign.*' \); bad=1
 fi
 # Personal markers are derived at runtime (never written into the repository): home path, git email, hostname.
+# Content only: .git holds local metadata (reflogs) that is never published; commit identities are set explicitly.
 for marker in "$HOME/" "$(git -C "$OLDPWD" config user.email)" "$(hostname -s)"; do
-  [[ -n "$marker" ]] && grep -rIlF -- "$marker" . && { echo "LEAK: local personal information present"; bad=1; }
+  [[ -n "$marker" ]] && grep -rIlF --exclude-dir=.git -- "$marker" . && { echo "LEAK: local personal information present"; bad=1; }
 done
-if grep -rIlE '/Users/[A-Za-z0-9._-]+/' . ; then echo "LEAK: local absolute user path present"; bad=1; fi
+if grep -rIlE --exclude-dir=.git '/Users/[A-Za-z0-9._-]+/' . ; then echo "LEAK: local absolute user path present"; bad=1; fi
 [[ $bad -eq 0 ]] || { echo "publication candidate REJECTED"; exit 1; }
-git init -q -b main
+[[ $UPDATE -eq 1 ]] || git init -q -b main
 git add -A
 git -c user.name="$(git -C "$OLDPWD" config user.name)" -c user.email="${PUBLICATION_AUTHOR_EMAIL:-$(git -C "$OLDPWD" config user.email)}" \
-  commit -q -m "Frontdesk V3.2 — sanitized publication snapshot of ${REV:0:12}" -m "See PROVENANCE.md."
+  commit -q -m "Frontdesk V3.2 — sanitized publication snapshot of ${REV:0:12}" -m "See PROVENANCE.md (source revision ${REV})."
 echo "candidate: $(pwd) commit $(git rev-parse HEAD) files $(git ls-files | wc -l | tr -d ' ')"

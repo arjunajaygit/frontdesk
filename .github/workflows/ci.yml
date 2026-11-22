@@ -73,6 +73,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       # An isolated PostgreSQL with the SAME role model as production (owner / restricted runtime / bootstrap).
       # Test-only bootstrap credentials stay inside the test harness; the application never receives them.
+      - name: Build the shared contracts package (imported by the API under test)
+        run: npm run build -w @frontdesk/contracts
       - name: Generate random test credentials and start isolated PostgreSQL
         run: |
           npm run env:gen
@@ -164,8 +166,8 @@ jobs:
       - name: Bounded k6 smoke and 9-agent claim contention (real auth/CSRF; 409 losers expected)
         run: |
           K6="docker run --rm --network host --user $(id -u):$(id -g) -v $PWD:/w -w /w grafana/k6@sha256:00fdcebafbc86cb0137d429529b1caa401a02e09025f02fc74866fa6e2b004d8"
-          $K6 run -q -e SCENARIO=smoke -e BASE=http://127.0.0.1:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
-          $K6 run -q -e SCENARIO=contention -e BASE=http://127.0.0.1:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
+          $K6 run -q -e SCENARIO=smoke -e BASE=http://localhost:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
+          $K6 run -q -e SCENARIO=contention -e BASE=http://localhost:8080 -e CREDS=/w/.local/credentials.prod-compose.json infrastructure/perf/frontdesk.k6.js
       - name: OWASP ZAP baseline (passive) against the isolated stack; FAIL rules block, reviewed rules documented
         run: |
           mkdir -p zap && chmod 777 zap && cp infrastructure/security/zap/baseline.conf zap/

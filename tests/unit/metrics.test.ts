@@ -110,8 +110,10 @@ describe('metrics: commit-only counting and bounded, private labels', () => {
     expect(
       await metric(m, 'frontdesk_sla_breaches_recorded_total{clock="other",priority="other"}'),
     ).toBe(1);
-    expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/i);
-    expect(text).not.toMatch(/@|PRIVATE|script|12345/);
+    // Privacy is about LABELS: metric values are numbers and may contain any digit sequence (e.g. memory bytes).
+    const labels = [...text.matchAll(/\{([^}]*)\}/g)].map((m) => m[1]).join('\n');
+    expect(labels).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/i);
+    expect(labels).not.toMatch(/@|PRIVATE|script|12345/);
     expect(await metric(m, 'frontdesk_db_up')).toBe(1);
   });
 
