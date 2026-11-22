@@ -13,6 +13,7 @@ Frontdesk gives customers one place to ask for help and gives support agents a s
 - [What Frontdesk does](#what-frontdesk-does)
 - [Features](#features)
 - [How to use the app](#how-to-use-the-app-beginners-guide)
+- [Demo login accounts and passwords](#demo-login-accounts-and-passwords)
 - [Architecture diagrams](#architecture-diagrams)
 - [Technology](#technology)
 - [Run locally](#run-locally)
@@ -229,6 +230,75 @@ Here is a practical walkthrough using **sample data**, not a real customer's per
 - **Why are displayed times in IST?** The configured business calendar uses Asia/Kolkata. Weekends and configured holidays do not count toward working-time SLAs.
 - **Why did a follow-up have a different ticket reference?** Once the old ticket can no longer be reopened, new contact becomes a **linked new ticket** to preserve the original history.
 - **Why am I signed in as a different user in another tab?** Tabs in the same browser profile share cookies. Use different browser profiles or private contexts when comparing customer and agent views.
+
+## Demo login accounts and passwords
+
+Frontdesk's example accounts are **fictional** and are defined in [`prisma/seed-data.ts`](prisma/seed-data.ts). You can use these emails after the relevant environment has been seeded. The password for **each account is generated randomly**; there is **no universal default password**.
+
+### Staff accounts
+
+| Name | Role | Login email |
+| --- | --- | --- |
+| Meera Iyer | Support lead | `meera.iyer@arvo.example` |
+| Arjun Nair | Agent | `arjun.nair@arvo.example` |
+| Priya Sharma | Agent | `priya.sharma@arvo.example` |
+| Rohan Mehta | Agent | `rohan.mehta@arvo.example` |
+| Kavya Reddy | Agent | `kavya.reddy@arvo.example` |
+| Vikram Singh | Agent | `vikram.singh@arvo.example` |
+| Ananya Das | Agent | `ananya.das@arvo.example` |
+| Imran Khan | Agent | `imran.khan@arvo.example` |
+| Sneha Patil | Agent | `sneha.patil@arvo.example` |
+
+### Customer accounts
+
+| Name | Role | Login email |
+| --- | --- | --- |
+| Aarav Menon | Customer | `aarav.menon@customer.example` |
+| Diya Kapoor | Customer | `diya.kapoor@customer.example` |
+| Sana Qureshi | Customer | `sana.qureshi@customer.example` |
+
+No separate **Admin** login is seeded by the default demo data. The seeded **Lead** account can demonstrate the administrative sweep control.
+
+### Where to find the passwords
+
+**Local development demo:** After running `npm run demo:db`, the project writes a JSON file **on your machine**, not in GitHub:
+
+```bash
+# Run in the project directory; shows the local demo emails and generated passwords.
+cat .local/credentials.frontdesk_demo.json
+```
+
+The file looks like an email-to-password mapping (example placeholders below, **not valid passwords**):
+
+```json
+{
+  "meera.iyer@arvo.example": "<random password generated on your machine>",
+  "arjun.nair@arvo.example": "<another random password>",
+  "aarav.menon@customer.example": "<another random password>"
+}
+```
+
+Select an email and use **that email's corresponding password** on the Sign in page. Every account can have a different password.
+
+**Production-like local Docker demo:** After explicitly running the optional seed container described under [Run with Docker](#run-with-docker), check `.local/credentials.prod-compose.json` on the machine where the seed ran.
+
+**Hosted Render demo:** Hosted demo passwords are **different** from local passwords and are **not available in this repository**. The deployment operator should retrieve the securely stored credentials from the host seeding process (typically `.local/credentials.hosted.json` **if** that label was used) and share only approved demo account details with each reviewer through a **private channel**. The email addresses above identify the seed accounts; they are not proof that every one exists or is enabled on the current hosted database.
+
+### Recommended accounts for a first-time demo
+
+- **Meera (Lead):** Open the staff workspace and show the **Run SLA sweep** permission.
+- **Arjun and Priya (Agents):** Use two different browser profiles to demonstrate who wins a simultaneous **Claim ticket** action.
+- **Imran (Agent) and Aarav (Customer):** Demonstrate that an **Internal note** is visible to staff but never exposed to the customer.
+- **Sana (Customer):** Demonstrate customer replies and a linked follow-up after the reopen window.
+
+The related seeded ticket references and demo steps are documented in the [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md).
+
+### Keep credentials safe
+
+- **Never paste working passwords** into `README.md`, screenshots, GitHub issues, commits, pull requests, or application logs—even if the repository is private.
+- The `.local/` directory is deliberately git-ignored. Keep permissions restricted and share individual hosted demo credentials privately.
+- **Do not rerun a production seed or reset passwords just to retrieve a lost password.** Seeding is intended to preserve existing users, and password reset is an explicit, controlled operation.
+- If the credentials file is missing, contact the environment operator. New randomly generated passwords for a **separate new local demo** are created by the normal setup steps; a hosted password reset requires explicit authorization.
 
 ## Architecture diagrams
 
