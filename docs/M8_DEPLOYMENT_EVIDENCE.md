@@ -8,20 +8,21 @@ simulated. Anything that could not be measured is marked **UNKNOWN**.
 | Item | Value |
 |---|---|
 | Repository | https://github.com/arjunajaygit/frontdesk (private; sanitized publication history; see PROVENANCE.md) |
-| Released source revision | `136ee894b9724655a09f54dded6782047368ebef` (publication repo) = sanitized snapshot of private development revision `fa94fbc` (includes the merged UI redesign, PR #13) |
-| CI (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45022244966: success (static, unit, PostgreSQL integration incl. PROOF-01..05, Playwright, Docker amd64 smoke/k6/ZAP, release gate) |
-| Security (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45022245000: success (Gitleaks full history, Semgrep, npm audit gate + SBOM, Trivy) |
+| Released source revision | `741fee7c673f3e903b8f4ea6d50bfb708aaf6ed1` (publication repo; merge of PR #14, the final assessment audit, on top of the redesign) |
+| CI (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45044659609: success (static, unit, PostgreSQL integration incl. PROOF-01..05, Playwright, Docker amd64 smoke/k6/ZAP, release gate) |
+| Security (that SHA) | https://github.com/arjunajaygit/frontdesk/actions/runs/45044659628: success (Gitleaks full history, Semgrep, npm audit gate + SBOM, Trivy) |
 | CodeQL | Skipped while the repository is private (code scanning on private repositories is a paid GitHub feature). Semgrep is the mandatory SAST gate. |
-| Release workflow | https://github.com/arjunajaygit/frontdesk/actions/runs/45022802427: success. Steps: gate (main, exact SHA, passing CI + Security) → one linux/amd64 build → smoke → Trivy gate → SBOM → publish → pull back → config-digest match → keyless sign + CycloneDX attestation → both verified against the exact workflow identity |
-| Registry manifest digest (deployed) | `ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980c77af19523f747f2e298c7fb8f72d8619e76c0eec3ee40772a4a9f33` (private GHCR package) |
-| Config digest (tested image) | `sha256:fd1ecc8c3655a79cd777edb044314f6d2d1de595ab472cf299bd265c0e279fed` (equal to the pulled-back image) |
+| Release workflow | https://github.com/arjunajaygit/frontdesk/actions/runs/45045027702: success. Steps: gate (main, exact SHA, passing CI + Security) → one linux/amd64 build → smoke → Trivy gate → SBOM → publish → pull back → config-digest match → keyless sign + CycloneDX attestation → both verified against the exact workflow identity |
+| Registry manifest digest (deployed) | `ghcr.io/arjunajaygit/frontdesk@sha256:aa4577a035a61ec6849f770e77d34530563e08504b3c7e546a829ee95c89baba` (private GHCR package) |
+| Config digest (tested image) | `sha256:dfc85783406015a6322a345104e2e956971474aca0482a3fa98a7e3efea4dde9` (equal to the pulled-back image) |
 | Independent signature check | Run locally with cosign: `cosign verify` and `cosign verify-attestation --type cyclonedx`. Identity `https://github.com/arjunajaygit/frontdesk/.github/workflows/release.yml@refs/heads/main`, issuer `https://token.actions.githubusercontent.com`. Both passed (claims validated, transparency-log inclusion verified, certificate chain verified). |
 | Live URL | https://frontdesk-arvo-support.onrender.com (Render Free, Singapore) |
-| Render deploy | `dep-dc1e4m4s728c73c6lpr0`, image `sha256:ebf7a980…`, live at 12:40 UTC |
-| Deployed revision check | `GET /api/healthz` → `{"ok":true,"commit":"136ee894b9724655a09f54dded6782047368ebef"}` |
+| Render deploy | `dep-dc1ho7cs728c73cfl4h0`, image `sha256:aa4577a0…`, live at 16:46 UTC |
+| Deployed revision check | `GET /api/healthz` → `{"ok":true,"commit":"741fee7c673f3e903b8f4ea6d50bfb708aaf6ed1"}` |
 | Database | Supabase Free project `frontdesk` (ap-southeast-1), PostgreSQL 17.12, IPv4 session pooler |
 
 **Previous deployments (same day).**
+- `136ee89`, digest `ebf7a980…`: CI 45022244966, Security 45022245000, release 45022802427, deploy `dep-dc1e4m4s728c73c6lpr0` at 12:40 (the redesign). The final audit's new runtime-health check found an unrecognised Permissions-Policy token on it, which is fixed in `741fee7`.
 - `9cadd0b`, digest `b5ef0a7f…`: CI 45017605776, Security 45017605825, release 45017938581, deploy `dep-dc1dkbajnfac738g25hg` at 12:04. It introduced strict database TLS and the scroll fix, passed every live suite below, and was replaced only to ship the merged redesign.
 - `a577264`, digest `681c5e31…be247c`: CI 44995365902, release 44995728324. It was replaced to ship the scroll fix and database TLS verification.
 
@@ -46,7 +47,7 @@ simulated. Anything that could not be measured is marked **UNKNOWN**.
 
 ## Pre-deployment residual-risk re-scan (exact manifest, refreshed DB)
 
-I ran a Trivy 0.76.2 remote scan before each deploy, for `b5ef0a7f…` and again for `ebf7a980…` (DB updated 2026-11-21 18:38 UTC, the latest published at scan time):
+I ran a Trivy 0.76.2 remote scan before each deploy, for `b5ef0a7f…`, `ebf7a980…` and `aa4577a0…` (DB updated 2026-11-21 18:38 UTC, the latest published at scan time):
 - 38 HIGH/CRITICAL package findings, across the same 11 advisories the owner conditionally accepted;
 - no new advisory, none removed, no fix available;
 - 0 npm, secret or misconfiguration findings.
@@ -74,7 +75,7 @@ The acceptance conditions (no new high/critical, no applicability change, no ava
 
   Credentials exist only in the git-ignored `.local/credentials.hosted.json` (0600) and are delivered through a private channel.
 
-## Deployed application checks (public HTTPS; identical results on `9cadd0b` and on the current `136ee89`)
+## Deployed application checks (public HTTPS; identical results on `9cadd0b`, `136ee89` and the current `741fee7`, which additionally passes `hosted-runtime-health` 9/9)
 
 | Suite | Result |
 |---|---|
@@ -171,7 +172,7 @@ Supabase Cron runs inside the database project at no extra cost and keeps the to
 # Deployed revision
 curl -s https://frontdesk-arvo-support.onrender.com/api/healthz
 # Signature + SBOM attestation of the deployed digest
-D=ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980c77af19523f747f2e298c7fb8f72d8619e76c0eec3ee40772a4a9f33
+D=ghcr.io/arjunajaygit/frontdesk@sha256:aa4577a035a61ec6849f770e77d34530563e08504b3c7e546a829ee95c89baba
 ID=https://github.com/arjunajaygit/frontdesk/.github/workflows/release.yml@refs/heads/main
 cosign verify --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$D"
 cosign verify-attestation --type cyclonedx --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com "$D"

@@ -134,7 +134,20 @@ Live:
 **New `hosted-runtime-health` on that deployment: FAIL.** Every page, at every width, logged one console warning: an unrecognised Permissions-Policy feature (`browsing-topics`). There were no other warnings, errors, failed assets or overflow. This is fixed in this branch, and the hosted re-verification of the fix release is recorded below.
 
 ### Hosted re-verification after the fix release
-_Recorded after the release of this branch (see the next commit)._
+**The release chain for the fixes:**
+- PR #14 merged as `741fee7`; CI `45044659609` and Security `45044659628` both passed.
+- Release `45045027702` produced digest `sha256:aa4577a0…c89baba`; signature and CycloneDX attestation were verified independently with cosign.
+- The re-scan was unchanged: 38 findings across the same 11 advisories, nothing new, no fix available.
+- Deploy `dep-dc1ho7cs728c73cfl4h0` went live at 16:46 UTC. `/api/healthz` reports `741fee7`, and the `Permissions-Policy` header no longer contains `browsing-topics`.
+
+**Live results on `741fee7`:**
+
+| Suite | Result |
+|---|---|
+| `smoke-prod` | 29/29 |
+| `hosted-verify` | 29/29 |
+| `hosted-browser` | 8/8 |
+| `hosted-runtime-health` (login, staff views + detail + audit, customer list/ticket/new; 1440/1024/390) | **9/9** (was 0/9 before the fix) |
 
 ## 6. Known limitations (final)
 - **One-week uptime:** time-based, so it cannot be verified yet. Free hosting sleeps when idle (one measured cold start, about 39 s); while asleep, persisted SLA effects can land up to about 30 minutes late (Supabase Cron every 30 minutes).
