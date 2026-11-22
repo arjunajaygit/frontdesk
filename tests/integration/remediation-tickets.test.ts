@@ -18,7 +18,7 @@ const C2 = 'diya.kapoor@customer.example';
 const AG1 = 'arjun.nair@arvo.example';
 const AG2 = 'priya.sharma@arvo.example';
 
-/** Controllable audit writer: lets a test pause INSIDE the business transaction before the append (M03). */
+/** Controllable audit writer: lets a test pause INSIDE the business transaction before the append. */
 class GatedAuditWriter extends AuditWriter {
   gate: Promise<void> | null = null;
   entered: (() => void) | null = null;
@@ -74,7 +74,7 @@ async function customerTicket(c = c1) {
   return r.body.id as string;
 }
 
-describe('H02: customer mutations never lock (or wait on) a foreign ticket', () => {
+describe('customer mutations never lock (or wait on) a foreign ticket', () => {
   it('busy foreign ticket and nonexistent ticket both 404 immediately; nothing is committed', async () => {
     const id = await customerTicket(c1);
     const holder = await LockHolder.hold(db, `SELECT id FROM "Ticket" WHERE id=$1 FOR UPDATE`, [
@@ -118,7 +118,7 @@ describe('H02: customer mutations never lock (or wait on) a foreign ticket', () 
   });
 });
 
-describe('M01: idempotent replay re-checks CURRENT authorisation before releasing a stored response', () => {
+describe('idempotent replay re-checks CURRENT authorisation before releasing a stored response', () => {
   it('former owner replaying after an ownership change gets 404, no stored body leak', async () => {
     const id = await customerTicket(c1);
     const key = newKey();
@@ -157,7 +157,7 @@ describe('M01: idempotent replay re-checks CURRENT authorisation before releasin
   });
 });
 
-describe('M03: logical event time vs actual audit recording time', () => {
+describe('logical event time vs actual audit recording time', () => {
   it('breachedAt stays deadline+1 while recordedAt/createdAt reflect the delayed append; message & publication agree', async () => {
     const id = await customerTicket(c1);
     await ag1.post(`/api/tickets/${id}/claim`);
@@ -207,7 +207,7 @@ describe('M03: logical event time vs actual audit recording time', () => {
   });
 });
 
-describe('L01: same-priority requests still honour lifecycle guards', () => {
+describe('same-priority requests still honour lifecycle guards', () => {
   const patch = (b: Browser, id: string, p = 'MEDIUM') =>
     b.patch(`/api/tickets/${id}/priority`, { priority: p });
   it('RESOLVED, CLOSED and overdue WAITING reject; IN_PROGRESS and eligible WAITING are pure no-ops', async () => {
@@ -256,7 +256,7 @@ describe('L01: same-priority requests still honour lifecycle guards', () => {
   });
 });
 
-describe('M05: classified error logging and independent retention maintenance', () => {
+describe('classified error logging and independent retention maintenance', () => {
   it('a dependency failure carrying a private marker never reaches logs or the HTTP error', async () => {
     const MARKER = 'M05-PRIVATE-MARKER-9d1e';
     const captured: string[] = [];

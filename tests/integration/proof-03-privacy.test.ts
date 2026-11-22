@@ -8,8 +8,8 @@ import { LockHolder } from '../helpers/observe';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * PROOF-03 / INC-0304 — customer privacy, including the H03 regression (> 500 public messages, no truncation).
- * Browser DOM / network / client-cache privacy is verified in M5.
+ * INC-0304 — customer privacy, including complete timelines with no truncation (> 500 public messages).
+ * Browser DOM / network / client-cache privacy is verified in tests/e2e/privacy.spec.ts.
  */
 const RUN = randomBytes(4).toString('hex');
 const marker = (i: number) => `PRIVNOTE-${RUN}-${i}`;
@@ -93,7 +93,7 @@ const assertNoPrivate = (raw: string) => {
   );
 };
 
-describe('H03 / PROOF-03: complete timeline without truncation, private content absent', () => {
+describe('private-note isolation: complete timeline without truncation, private content absent', () => {
   it('fixture: > 500 public messages with interleaved private notes', () => {
     expect(publicIds.length).toBe(PUBLIC_COUNT);
     expect(noteIds.length).toBeGreaterThanOrEqual(12);
@@ -181,7 +181,7 @@ describe('H03 / PROOF-03: complete timeline without truncation, private content 
   });
 });
 
-describe('PROOF-03: authorisation boundaries', () => {
+describe('private-note isolation: authorisation boundaries', () => {
   it('cross-customer reads and mutations are 404 everywhere and leak nothing', async () => {
     const paths = [
       c2.get(`/api/customer/tickets/${ticketId}`),
@@ -270,7 +270,7 @@ describe('PROOF-03: authorisation boundaries', () => {
   });
 });
 
-describe('PROOF-03: SQL-level projections (inspected arguments of the customer queries)', () => {
+describe('private-note isolation: SQL-level projections (inspected arguments of the customer queries)', () => {
   it('customer queries filter ownership AND visibility=PUBLIC and select only allowlisted columns on every page', async () => {
     const calls: { model: string; args: Record<string, unknown> }[] = [];
     const record = (model: string, result: unknown) => async (args: Record<string, unknown>) => (

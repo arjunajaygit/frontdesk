@@ -3,7 +3,7 @@ import { USERS } from './helpers/env';
 import { captureApi, db, loginUi, signedInContext } from './helpers/ui';
 
 /**
- * PROOF-03 (browser): real Chromium, real frontend, real NestJS, real PostgreSQL. Staff and customers use
+ * Private-note isolation in the browser: real Chromium, real frontend, real NestJS, real PostgreSQL. Staff and customers use
  * INDEPENDENT browser contexts. Network response bodies are inspected, not just the rendered DOM.
  */
 const MARKER = 'PRIVATE-NOTE-MARKER-FD010-DO-NOT-LEAK'; // seeded private note on FD-010 (customer: Aarav)

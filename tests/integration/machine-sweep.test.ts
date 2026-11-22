@@ -8,7 +8,7 @@ import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 /**
  * Machine-triggered scheduled sweep (free-hosting adaptation) on REAL PostgreSQL: dedicated credential, explicit
  * boundary (only this route skips Origin/CSRF), SYSTEM attribution, deterministic slot identity (replay, duplicate
- * delivery), persisted business outcome, metrics trigger label (L01).
+ * delivery), persisted business outcome, metrics trigger label.
  */
 const TOKEN = randomBytes(36).toString('base64url');
 const MPORT = 40_500 + Math.floor(Math.random() * 300);

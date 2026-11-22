@@ -7,7 +7,7 @@ import { hmac, safeEqual, subkey } from './crypto';
 export const SESSION_CONTEXT_HEADER = 'x-session-context';
 
 /**
- * Opaque, non-secret per-session context (final audit H02). Each browser tab learns the context of the session it
+ * Opaque, non-secret per-session context. Each browser tab learns the context of the session it
  * was rendered for (login / refresh / GET /auth/me) and echoes it on requests. Tabs share cookies, so after another
  * tab signs in as someone else a stale tab would otherwise act with the REPLACEMENT session's cookies. The server
  * compares the echoed context with the context of the session actually authenticated by the cookies and rejects

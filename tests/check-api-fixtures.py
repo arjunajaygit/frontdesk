@@ -1,6 +1,6 @@
 """Targeted schema smoke checks, NOT full OpenAPI 3.0 conformance or HTTP tests.
 Run: python tests/check-api-fixtures.py (requires PyYAML and jsonschema).
-M1 must additionally run a genuine OpenAPI-aware validator.
+The OpenAPI-aware validation lives in tests/unit/openapi.test.ts (npm run verify:openapi).
 """
 from pathlib import Path
 import copy

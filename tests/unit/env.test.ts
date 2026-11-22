@@ -20,7 +20,7 @@ const issues = (env: Record<string, string | undefined>) => {
   throw new Error('config unexpectedly valid');
 };
 
-describe('startup configuration (AUTH_CONTRACT V3.2)', () => {
+describe('startup configuration (AUTH_CONTRACT)', () => {
   it('accepts a valid development configuration and applies defaults', () => {
     const cfg = parseEnv(good());
     expect(cfg.PORT).toBe(3000);

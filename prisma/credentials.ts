@@ -13,14 +13,14 @@ import * as path from 'node:path';
 import { randomBytes } from 'node:crypto';
 
 /**
- * Credential-file safety (M6, after the M5 overwrite incident):
+ * Credential-file safety (added after an incident in which a credentials file was overwritten):
  *  - the file name is DERIVED from the target database (`.local/credentials.<db>.json`), so one environment can
  *    never write into another's file; there is no free-form output path any more;
  *  - an existing entry is never replaced unless SEED_ALLOW_CREDENTIAL_OVERWRITE=true;
  *  - the write is atomic (temp file, mode 0600, fsync, rename), serialised by an exclusive lock file, confined to
  *    the credentials directory after path normalisation, and the contents are never printed;
  *  - callers check writability BEFORE changing hashes and record plaintext BEFORE committing new hashes, so a
- *    password hash can never exist without its recorded plaintext (the M5 failure mode).
+ *    password hash can never exist without its recorded plaintext (the failure mode of that incident).
  */
 export const LOCAL_DIR = path.resolve(__dirname, '..', '.local');
 
@@ -41,7 +41,7 @@ export function credentialsFileFor(db: string, label?: string): string {
 /**
  * Name of the PostgreSQL advisory lock that serialises EVERY credential-producing operation on one database
  * (seed user creation, password reset): discovery -> generation -> file record -> hash insert/update all happen
- * inside one transaction holding pg_advisory_xact_lock(hashtextextended(<this>, 0)). Final audit M02: the file
+ * inside one transaction holding pg_advisory_xact_lock(hashtextextended(<this>, 0)). The file
  * lock alone ended before the database insert, so two authorised overlapping runs could record one run's
  * passwords while committing the other's hashes. Transaction-scoped: released on commit, rollback or crash.
  */

@@ -4,7 +4,7 @@ class SmallLimiter extends RateLimiter {
   protected override readonly maxKeys = 100;
 }
 
-describe('RateLimiter (M01): bounded memory, per-key windows', () => {
+describe('RateLimiter: bounded memory, per-key windows', () => {
   it('a spray of distinct keys never grows beyond the bound, and the counted caller is still limited', () => {
     const l = new SmallLimiter();
     for (let i = 0; i < 5000; i++) l.consume(`ip:${i}`, 10);

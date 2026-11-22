@@ -6,9 +6,32 @@ Frontdesk gives customers one place to ask for help and gives support agents a s
 
 [**Live demo**](https://frontdesk-arvo-support.onrender.com) · [**Reviewer walkthrough**](docs/REVIEWER_WALKTHROUGH.md) · [**API contract**](docs/openapi.draft.yaml) · [**Deployment guide**](infrastructure/deploy/DEPLOYMENT.md)
 
+## 👋 Reviewer: start here (≈10 minutes)
+
+**1. Open the live demo:** https://frontdesk-arvo-support.onrender.com. Logins were sent through the submission channel. It runs on a free tier, so the first load may take about 40 seconds while it wakes up.
+
+**2. Try three things:**
+
+| Try this | Sign in as | What you should see |
+| --- | --- | --- |
+| **Claim race:** open **FD-004** in two browser profiles and press _Claim ticket_ in both (a claim can only be won once; **FD-005** is a spare) | Two agents | Only one claim succeeds; the other agent is told who got it |
+| **SLA clocks:** _Breached_ → **FD-001**, then _Waiting on customer_ → **FD-006** | Agent | Two separate clocks (response and resolution); the resolution clock is paused while the ticket waits on the customer |
+| **Private notes:** open **FD-010**, then view the same ticket in the customer portal | Agent, then customer | The team-only note never reaches the customer, not on screen, not in the API response, not in the JSON/CSV export |
+
+More scenarios: [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md).
+
+**3. If you read only three files:**
+
+- [`apps/api/src/domain/sla/sla-clock.ts`](apps/api/src/domain/sla/sla-clock.ts): the SLA rules as pure functions, with no database or framework code
+- [`apps/api/src/tickets/ticket-command.service.ts`](apps/api/src/tickets/ticket-command.service.ts): how every change runs (idempotency reservation → lock the ticket → fresh database time → lock its clocks → apply the domain rule → write the audit → store the outcome), all in one transaction
+- [`docs/DOMAIN_CONTRACT.md`](docs/DOMAIN_CONTRACT.md): where the brief was ambiguous, the interpretation I chose, and the exact edge cases
+
+**A note on scope:** I went well past the suggested 8 hours. That was a deliberate choice, and I explain it in [SHORT_NOTE.md](SHORT_NOTE.md). The core of the submission is `apps/`, `packages/contracts/`, `prisma/` and the calendar kernel `src/calendar.mjs`. Most of `infrastructure/` and `docs/` is extra and not needed to judge it.
+
 
 ## Contents
 
+- [Reviewer: start here](#-reviewer-start-here-10-minutes)
 - [What Frontdesk does](#what-frontdesk-does)
 - [Features](#features)
 - [How to use the app](#how-to-use-the-app-beginners-guide)
@@ -21,6 +44,7 @@ Frontdesk gives customers one place to ask for help and gives support agents a s
 - [Deploy](#deploy)
 - [Tests](#tests)
 - [Repository structure](#repository-structure)
+- [About the git history](#about-the-git-history)
 - [Troubleshooting](#troubleshooting)
 - [Security and limitations](#security-and-limitations)
 - [Further reading](#further-reading)
@@ -667,6 +691,12 @@ frontdesk/
 └── README.md                 Project guide
 ```
 
+## About the git history
+
+This public repository is published from my private working repository as **sanitized snapshots**, not as the original commit-by-commit history. [`scripts/build-publication.sh`](scripts/build-publication.sh) exports an exact private revision with `git archive`, deletes the six paths listed in [`infrastructure/publish/EXCLUDE.txt`](infrastructure/publish/EXCLUDE.txt) (the employer's assessment PDF, an internal baseline PDF, a raw private audit report and AI-agent configuration files), and refuses to commit if any withheld path, forbidden file type (PDF, `.env`, keys, credential JSON) or local personal marker survives. Secrets were never committed in the first place (they live in git-ignored files); the check simply fails closed if one ever appears. Each snapshot is appended without rewriting earlier ones, and [`PROVENANCE.md`](PROVENANCE.md) records the exact source revision. Pull-request merges made on GitHub sit between the snapshots.
+
+Milestone-by-milestone progress, decisions and mistakes are in [`docs/IMPLEMENTATION_NOTES.md`](docs/IMPLEMENTATION_NOTES.md). Precise wall-clock times were recorded from M7 onward; the earlier milestones state that they were not.
+
 ## Troubleshooting
 
 | Problem | Suggested fix |
@@ -689,7 +719,7 @@ frontdesk/
 
 ## Further reading
 
-[Assessment compliance](docs/FINAL_ASSESSMENT_COMPLIANCE.md) · [Functional test report](docs/FINAL_FUNCTIONAL_TEST_REPORT.md) · [Deployment evidence](docs/M8_DEPLOYMENT_EVIDENCE.md) · [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md) · [High-level design](docs/HLD.md) · [Low-level design](docs/LLD.md) · [Database design](docs/DATABASE_DESIGN.md) · [Domain rules](docs/DOMAIN_CONTRACT.md) · [Auth contract](docs/AUTH_CONTRACT.md) · [Sweep contract](docs/SWEEP_CONTRACT.md) · [Security architecture](docs/SECURITY_ARCHITECTURE.md) · [DevSecOps](docs/DEVSECOPS.md) · [Risk register](docs/RISK_REGISTER.md) · [Engineering proofs](docs/ENGINEERING_PROOFS.md)
+[Assessment compliance](docs/FINAL_ASSESSMENT_COMPLIANCE.md) · [Glossary of internal tags](docs/GLOSSARY.md) · [Functional test report](docs/FINAL_FUNCTIONAL_TEST_REPORT.md) · [Deployment evidence](docs/M8_DEPLOYMENT_EVIDENCE.md) · [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md) · [High-level design](docs/HLD.md) · [Low-level design](docs/LLD.md) · [Database design](docs/DATABASE_DESIGN.md) · [Domain rules](docs/DOMAIN_CONTRACT.md) · [Auth contract](docs/AUTH_CONTRACT.md) · [Sweep contract](docs/SWEEP_CONTRACT.md) · [Security architecture](docs/SECURITY_ARCHITECTURE.md) · [DevSecOps](docs/DEVSECOPS.md) · [Risk register](docs/RISK_REGISTER.md) · [Engineering proofs](docs/ENGINEERING_PROOFS.md)
 
 ---
 

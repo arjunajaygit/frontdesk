@@ -56,7 +56,7 @@ export const LEAD: StaffActor = { type: 'LEAD', id: 'a0000000-0000-4000-8000-000
 const auditValidator = makeValidator(loadSpec())('AuditEvent');
 let envelopeSeq = 0;
 
-/** Every emitted event must conform to the strict OpenAPI AuditEvent union once enveloped (M3 adds id/correlation). */
+/** Every emitted event must conform to the strict OpenAPI AuditEvent union once enveloped (persistence adds id/correlation). */
 export function expectEventsConform(...results: MutationResult[]): void {
   for (const r of results) {
     for (const e of r.events) {

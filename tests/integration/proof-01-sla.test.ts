@@ -5,7 +5,7 @@ import { Browser, conforms, signedIn, startApp, TestApp } from '../helpers/http'
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
 /**
- * PROOF-01 — SLA correctness through the real application. Exact calendar boundaries (Friday 18:00/18:30,
+ * SLA correctness through the real application. Exact calendar boundaries (Friday 18:00/18:30,
  * weekend/holiday rollover, equality vs +1 ms, worked DOMAIN_CONTRACT cases) are deterministic domain tests
  * (tests/unit/domain/*, 12 original kernel tests) executed in the same proof run; here every rule is
  * re-verified end-to-end with real DB time and stored-state fixtures (no clock override exists).
@@ -52,7 +52,7 @@ async function staffTicket(priority: 'URGENT' | 'MEDIUM' | 'LOW') {
   return r.body as { id: string; clocks: Clock[] };
 }
 
-describe('PROOF-01: policy tiers and independent clocks (HTTP, real DB time)', () => {
+describe('SLA correctness: policy tiers and independent clocks (HTTP, real DB time)', () => {
   it.each([
     ['URGENT', 120, null],
     ['MEDIUM', 270, 1620],
@@ -82,7 +82,7 @@ describe('PROOF-01: policy tiers and independent clocks (HTTP, real DB time)', (
   });
 });
 
-describe('PROOF-01: explicit waiting, zero-budget resume, escalation and history', () => {
+describe('SLA correctness: explicit waiting, zero-budget resume, escalation and history', () => {
   it('waiting freezes consumption; resume with zero remaining sets deadline = resume time (late at +1 ms)', async () => {
     const b = await staffTicket('MEDIUM');
     const wait = await agent.post(`/api/tickets/${b.id}/wait`, { body: 'need info' });

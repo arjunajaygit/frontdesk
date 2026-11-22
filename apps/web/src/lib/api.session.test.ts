@@ -21,7 +21,7 @@ const count = (pred: (c: (typeof calls)[number]) => boolean) => calls.filter(pre
 beforeEach(() => __resetApiState());
 afterEach(() => vi.unstubAllGlobals());
 
-describe('restoreSession (H01)', () => {
+describe('restoreSession', () => {
   it('expired access + valid refresh: exactly ONE refresh, then the viewer is restored', async () => {
     let refreshed = false;
     mockFetch((url) => {
@@ -67,7 +67,7 @@ describe('restoreSession (H01)', () => {
   });
 });
 
-describe('session-bound requests (H02)', () => {
+describe('session-bound requests', () => {
   it('every request carries the tab session context', async () => {
     mockFetch(() => json(200, { items: [] }));
     adoptSession(ME.sessionContext, 'tok');

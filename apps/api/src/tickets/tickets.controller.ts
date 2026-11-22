@@ -60,7 +60,7 @@ export class StaffTicketsController {
     return this.queries.staffDetail(principal(req), id(raw));
   }
 
-  /** Full timeline, newest page first; follow nextCursor for older messages (H03). */
+  /** Full timeline, newest page first; follow nextCursor for older messages. */
   @Get(':id/messages')
   messages(@Req() req: Request, @Param('id') raw: string, @Query() query: unknown) {
     return this.queries.staffMessages(principal(req), id(raw), parse(Schemas.timeline, query, 'query'));

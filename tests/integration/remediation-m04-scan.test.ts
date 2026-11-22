@@ -5,7 +5,7 @@ import { conforms, newKey, signedIn, start, startApp, TestApp } from '../helpers
 import { Observer } from '../helpers/observe';
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
-/** M04: candidate scans run under transaction-local timeouts bounded by the remaining invocation budget. */
+/** Candidate scans run under transaction-local timeouts bounded by the remaining invocation budget. */
 let t: TestApp;
 let db: string;
 let owner: Client;

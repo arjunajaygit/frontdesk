@@ -46,7 +46,7 @@ export interface MutationResult {
   /** false => nothing to persist; version and updatedAt unchanged. */
   readonly changed: boolean;
   readonly counters: TransitionCounters;
-  /** DB time was behind ticket.updatedAt and was clamped (log, M3). */
+  /** DB time was behind ticket.updatedAt and was clamped (logged). */
   readonly timeAnomaly: boolean;
 }
 
@@ -132,7 +132,7 @@ class Draft {
 
 /**
  * Centralised ticket state machine (DOMAIN_CONTRACT actor/command matrix). Pure: callers supply the
- * DB-sampled time; results are persisted by the application layer in one transaction (M3).
+ * DB-sampled time; results are persisted by the application layer in one transaction.
  * Every command first applies `reconcile`, the exact rule the sweep applies, so outcomes do not depend
  * on whether a sweep has already run.
  */
@@ -156,7 +156,7 @@ export class TicketLifecycle {
     });
   }
 
-  /** Staff intake on behalf of an existing customer (existence checked by M3). INTAKE never satisfies RESPONSE. */
+  /** Staff intake on behalf of an existing customer (existence checked by the application layer). INTAKE never satisfies RESPONSE. */
   staffIntake(cmd: { actor: Actor; customerId: string; subject: string; body: string; priority: Priority; now: Instant }): MutationResult {
     const actor = this.requireStaff(cmd.actor);
     return this.createTicket({ ...cmd, actor, requestedPriority: null, parentTicketId: null });
@@ -240,7 +240,7 @@ export class TicketLifecycle {
   changePriority(agg: TicketAggregate, actor: Actor, priority: Priority, sampledNow: Instant): MutationResult {
     const staff = this.requireAssignee(agg, actor);
     // State guards apply to the EFFECTIVE (reconciled) state first, so resolved/closed/expired tickets can't
-    // slip through as a "same priority" no-op (L01).
+    // slip through as a "same priority" no-op.
     const d = this.begin(agg, sampledNow);
     this.requireStatus(d, ['IN_PROGRESS', 'WAITING']);
     if (agg.ticket.priority === priority) return this.begin(agg, sampledNow, false).result(); // pure no-op
@@ -525,7 +525,11 @@ export class TicketLifecycle {
     text(c.body, MAX_BODY, 'message');
     const id = this.deps.ids.next('ticket');
     const clocks = (['RESPONSE', 'RESOLUTION'] as const).map((kind) =>
-      startClock({ id: this.deps.ids.next('clock'), ticketId: id, kind, cycle: 0, priority: c.priority, now }, this.deps.policy, this.deps.calendar),
+      startClock(
+        { id: this.deps.ids.next('clock'), ticketId: id, kind, cycle: 0, priority: c.priority, now },
+        this.deps.policy,
+        this.deps.calendar,
+      ),
     );
     const ticket: Ticket = {
       id,

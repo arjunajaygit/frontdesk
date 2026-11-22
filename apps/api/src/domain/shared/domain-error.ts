@@ -1,4 +1,4 @@
-/** Domain rejection. `kind` lets the HTTP layer (M3) map to 400/403/404/409 without domain knowledge of HTTP. */
+/** Domain rejection. `kind` lets the HTTP layer map to 400/403/404/409 without domain knowledge of HTTP. */
 export type DomainErrorKind = 'VALIDATION' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT';
 
 export type DomainErrorCode =

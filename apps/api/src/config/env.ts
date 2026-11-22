@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** Startup configuration (AUTH_CONTRACT V3.2). Error messages never echo secret values. */
+/** Startup configuration (see docs/AUTH_CONTRACT.md). Error messages never echo secret values. */
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const PLACEHOLDER = /(replace_with|replace_me|changeme|change_me|placeholder|your[-_]secret)/i;
@@ -59,7 +59,7 @@ const schema = z
     BUSINESS_TIMEZONE: z.literal('Asia/Kolkata').default('Asia/Kolkata'),
     DATABASE_URL: dbUrl,
     MIGRATION_DATABASE_URL: dbUrl.optional(),
-    /** Restricted runtime role the app must connect as; an equivalent role is allowed only if it passes H04 checks. */
+    /** Restricted runtime role the app must connect as; an equivalent role is allowed only if it passes the startup privilege checks (prisma/runtime-privileges.ts). */
     DATABASE_RUNTIME_ROLE: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/).default('frontdesk_app'),
     PUBLIC_ORIGIN: origin,
     JWT_SECRET: z.string().min(1),
@@ -83,11 +83,11 @@ const schema = z
     SWEEP_INTERVAL_MS: z.coerce.number().int().min(5_000).max(3_600_000).default(60_000),
     /** Bounded drain of an in-flight sweep tick on SIGTERM; keep below the platform's stop grace period. */
     SWEEP_SHUTDOWN_DRAIN_MS: z.coerce.number().int().min(100).max(120_000).default(20_000),
-    /** Number of trusted reverse-proxy hops (0 = trust none). Configure narrowly per host (M8). */
+    /** Number of trusted reverse-proxy hops (0 = trust none). Configure narrowly per host (1 behind Render's proxy). */
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
     LOGIN_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).max(10_000).default(10),
     SWEEP_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).max(1_000).default(6),
-    /** Per authenticated USER (all of that user's sessions share it) — final audit M01. */
+    /** Per authenticated USER (all of that user's sessions share it), so colleagues behind one office IP never throttle each other. */
     API_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(10).max(100_000).default(600),
     /** Coarse per-IP flood ceiling for all /api traffic before authentication (a whole office may share one IP). */
     API_IP_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(10).max(1_000_000).default(3000),

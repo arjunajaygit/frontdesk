@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [apply],
   );
 
-  // Startup: restore the viewer, refreshing once if the access token expired while a refresh session is valid (H01).
+  // Startup: restore the viewer, refreshing once if the access token expired while a refresh session is valid.
   useEffect(() => {
     let alive = true;
     restoreSession()
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       invalidateSession(); // nothing from a previous session may be retried under the new one
       setSwitchedNotice(null);
-      await fetchCsrf('login'); // explicit PRE-LOGIN token, even if an old session cookie exists (H01)
+      await fetchCsrf('login'); // explicit PRE-LOGIN token, even if an old session cookie exists
       const res = await request<SessionResponse>('/auth/login', { method: 'POST', json: { email, password } });
       adoptSession(res.sessionContext, res.csrfToken); // CSRF rotated on login
       apply({ ...res.viewer, sessionContext: res.sessionContext });

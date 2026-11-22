@@ -10,7 +10,7 @@ import { CursorCodec, type Position } from './cursor';
 
 type Reader = Tx | Prisma.TransactionClient;
 
-/** H03: no silent truncation — conversations are keyset-paginated (newest page first) and exports are complete. */
+/** No silent truncation — conversations are keyset-paginated (newest page first) and exports are complete. */
 export const TIMELINE_PAGE = 50;
 export const EXPORT_BATCH = 500;
 

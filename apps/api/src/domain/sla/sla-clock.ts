@@ -50,7 +50,7 @@ export type BreachCause = 'DEADLINE_EXCEEDED' | 'PRIORITY_ESCALATION';
 export interface BreachFact {
   clock: SlaClock;
   breachedAt: Instant;
-  /** Provisional (logical) — the audit writer replaces it with the actual append time (M03). */
+  /** Provisional (logical) — the audit writer replaces it with the actual append time. */
   recordedAt: Instant;
   missedDeadlineAt: Instant | null;
   cause: BreachCause;

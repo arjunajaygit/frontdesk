@@ -1,4 +1,4 @@
-/** Actor derived from the verified session (M3), never from request bodies. SYSTEM = scheduler/rules. */
+/** Actor derived from the verified session, never from request bodies. SYSTEM = scheduler/rules. */
 export type StaffRole = 'AGENT' | 'LEAD' | 'ADMIN';
 export type StaffActor = { readonly type: StaffRole; readonly id: string };
 export type CustomerActor = { readonly type: 'CUSTOMER'; readonly id: string };

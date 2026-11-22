@@ -79,7 +79,7 @@ describe('same-origin static serving', () => {
     expect(head.status).toBe(200);
   });
 
-  it('M7 ZAP hardening: Permissions-Policy and cross-origin isolation on pages and API; API CSP has no helmet defaults', async () => {
+  it('security headers (ZAP findings): Permissions-Policy and cross-origin isolation on pages and API; API CSP has no helmet defaults', async () => {
     for (const path of ['/', '/portal/tickets/x', '/api/healthz']) {
       const r = await request(t.server).get(path);
       expect(r.headers['permissions-policy']).toMatch(/camera=\(\)/);

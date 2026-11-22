@@ -35,7 +35,7 @@ const refreshWith = (b: Browser, cookie: string) =>
     .set('Cookie', `frontdesk_refresh=${cookie}; frontdesk_csrf=${b.cookie('frontdesk_csrf')}`);
 const SESSION_LOCK = '%FROM "Session"%FOR UPDATE%';
 
-describe('M02: refresh re-validates absolute expiry with fresh DB time AFTER the session lock', () => {
+describe('refresh re-validates absolute expiry with fresh DB time AFTER the session lock', () => {
   it('session valid when refresh starts, expires while it waits on the lock -> 401, no rotation, token unused', async () => {
     const b = await signedIn(t, AGENT);
     const cookie = b.cookie('frontdesk_refresh')!;
@@ -86,7 +86,7 @@ describe('M02: refresh re-validates absolute expiry with fresh DB time AFTER the
   });
 });
 
-describe('M02: access JWTs must carry every mandatory claim', () => {
+describe('access JWTs must carry every mandatory claim', () => {
   it('rejects correctly-signed tokens with missing/invalid exp or iat, excessive lifetime, wrong iss/aud/typ, or sub/sid mismatch', async () => {
     const b = await signedIn(t, AGENT);
     const other = await signedIn(t, OTHER);

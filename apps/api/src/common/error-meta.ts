@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 /**
- * Allowlisted diagnostic metadata for logs (M05). Never includes error messages, stack traces, SQL, driver
+ * Allowlisted diagnostic metadata for logs. Never includes error messages, stack traces, SQL, driver
  * text or user content — those may carry tokens, credentials or private note bodies.
  */
 export interface ErrorMeta {

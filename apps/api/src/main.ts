@@ -20,7 +20,7 @@ async function bootstrap(): Promise<void> {
 }
 
 bootstrap().catch((err: unknown) => {
-  // Only our own controlled messages are printed; anything else is reduced to classified metadata (M05).
+  // Only our own controlled messages are printed; anything else is reduced to classified metadata.
   const safe = err instanceof ConfigValidationError || err instanceof RuntimePrivilegeError;
   console.error(safe ? (err as Error).message : `startup failed: ${JSON.stringify(errorMeta(err))}`);
   process.exit(1);

@@ -12,7 +12,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnAppli
     super();
   }
 
-  /** Connect, then refuse to start unless the effective DB identity is the restricted runtime role (H04). */
+  /** Connect, then refuse to start unless the effective DB identity is the restricted runtime role. */
   async onModuleInit(): Promise<void> {
     await this.$connect();
     this.violations = await verifyRuntimePrivileges(this, this.config.DATABASE_RUNTIME_ROLE);
@@ -28,7 +28,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnAppli
   }
 
   /**
-   * Final audit M03: disconnect in the LAST lifecycle phase. Nest runs onModuleDestroy -> beforeApplicationShutdown
+   * Disconnect in the LAST lifecycle phase. Nest runs onModuleDestroy -> beforeApplicationShutdown
    * (scheduler stops and drains in-flight sweep transactions) -> HTTP server close (in-flight requests finish) ->
    * onApplicationShutdown. Disconnecting earlier (onModuleDestroy) cut the database out from under a draining sweep.
    */

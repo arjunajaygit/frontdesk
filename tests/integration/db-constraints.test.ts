@@ -228,7 +228,7 @@ describe('database integrity constraints (real PostgreSQL)', () => {
     expect((await ins('TICKET', U(40), null, 'AGENT', agent, 'dup')).code).toBe('23505');
   });
 
-  it('SweepInvocation: actor/state/lease/progress constraints (V3.2) and unique key', async () => {
+  it('SweepInvocation: actor/state/lease/progress constraints and unique key', async () => {
     const ins = (o: Record<string, unknown>) => {
       const row = {
         id: U(Math.floor(Math.random() * 1e9) + 100),

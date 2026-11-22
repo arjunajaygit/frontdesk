@@ -24,7 +24,7 @@ export interface SweepInvocationStore {
 }
 
 export interface SweepCandidateSource {
-  /** `budgetMs`: remaining invocation time; implementations must bound the scan by it (M04). */
+  /** `budgetMs`: remaining invocation time; implementations must bound the scan by it, so a blocked scan cannot stall the scheduler. */
   selectCandidates(snapshot: Instant, after: SweepCursor | null, limit: number, budgetMs: number): Promise<SweepCandidate[]>;
   anyDue(snapshot: Instant, budgetMs: number): Promise<boolean>;
 }
@@ -36,7 +36,7 @@ export type TicketProcessOutcome =
   | { kind: 'FENCED' };
 
 /**
- * One ticket transaction (M3 adapter): lock invocation row -> ticket FOR UPDATE SKIP LOCKED -> ordered clocks,
+ * One ticket transaction (implemented by the PostgreSQL adapter): lock invocation row -> ticket FOR UPDATE SKIP LOCKED -> ordered clocks,
  * recheck eligibility with fresh DB time, persist domain changes + audit + counters, re-verify lease before commit.
  */
 export interface SweepTicketProcessor {

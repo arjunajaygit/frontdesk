@@ -9,7 +9,7 @@ import {
   writeCredentials,
 } from '../../prisma/credentials';
 
-describe('credential file safety (M5 overwrite incident)', () => {
+describe('credential file safety (credentials-file overwrite incident)', () => {
   const base = mkdtempSync(path.join(tmpdir(), 'fd-cred-'));
   const file = path.join(base, 'credentials.frontdesk_demo.json');
 

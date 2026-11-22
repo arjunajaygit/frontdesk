@@ -45,7 +45,7 @@ export class PgSweepTicketProcessor implements SweepTicketProcessor {
           if (!r.changed) return { kind: 'NOOP' } as const; // no version bump, no writes
           const correlationId = await this.store.correlationOf(tx, lease.id);
           await this.repo.persist(tx, before, r, correlationId);
-          // Final fence (H01): counters are written by a lease-guarded statement; failure rolls back the ticket work.
+          // Final fence: counters are written by a lease-guarded statement; failure rolls back the ticket work.
           if (!(await this.store.commitTicketProgress(tx, lease, r.counters))) throw new Fenced();
           this.hooks.onCommit(tx, () => this.metrics.sweepTicketChanged());
           return { kind: 'CHANGED' } as const;

@@ -9,7 +9,7 @@ import { ROOT, dotenv, roleUrl, SEED_ANCHOR } from '../helpers/db';
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
 /**
- * Final audit M02 on REAL PostgreSQL with REAL concurrent processes. Overlap is forced at the worst point: run A
+ * Concurrent seed runs on REAL PostgreSQL with REAL concurrent processes. Overlap is forced at the worst point: run A
  * has recorded its passwords in the credentials file and is blocked BEFORE inserting the users (a test transaction
  * holds a table lock that conflicts only with INSERT); run B is started while A is stalled. Both runs carry the
  * overwrite authorisation. Previously B would overwrite A's recorded passwords and A would then commit hashes for
@@ -50,7 +50,7 @@ async function verifyAll(c: Client, file: string) {
   return recorded;
 }
 
-describe('M02: concurrent credential-producing operations are serialised per database', () => {
+describe('concurrent credential-producing operations are serialised per database', () => {
   let db: string;
   let c: Client;
   let blocker: Client;
