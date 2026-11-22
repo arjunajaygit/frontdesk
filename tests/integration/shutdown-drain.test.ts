@@ -37,10 +37,25 @@ function startApi(extra: Record<string, string> = {}) {
       ...extra,
     },
   });
-  proc.stdout!.on('data', (d) => logs.push(...String(d).split('\n').filter(Boolean)));
-  proc.stderr!.on('data', (d) => logs.push(...String(d).split('\n').filter(Boolean)));
+  // Assemble complete lines across chunks: a pipe chunk can end mid-line, and splitting each chunk on its own lost
+  // JSON log records that straddled a boundary (the cause of an intermittent CI failure of this test).
+  const lines = (stream: NodeJS.ReadableStream) => {
+    let rest = '';
+    stream.on('data', (d) => {
+      const parts = (rest + String(d)).split('\n');
+      rest = parts.pop() ?? '';
+      logs.push(...parts.filter(Boolean));
+    });
+    stream.on('end', () => {
+      if (rest) logs.push(rest);
+      rest = '';
+    });
+  };
+  lines(proc.stdout!);
+  lines(proc.stderr!);
   const exited = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve) =>
-    proc.on('exit', (code, signal) => resolve({ code, signal })),
+    // 'close' (not 'exit'): fires only after stdout/stderr are fully read, so the final shutdown log is captured.
+    proc.on('close', (code, signal) => resolve({ code, signal })),
   );
   return { proc, exited };
 }

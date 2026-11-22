@@ -1,33 +1,40 @@
-# Submission note
+# Short note: what I did not finish, and why
 
-**Live:** https://frontdesk-arvo-support.onrender.com (Render Free + Supabase Free, synthetic data only). It runs revision
-`136ee89` (including the redesigned UI) from the signed image `ghcr.io/arjunajaygit/frontdesk@sha256:ebf7a980…`. **Repository:** the private
-https://github.com/arjunajaygit/frontdesk. Reviewer access and demo accounts are granted through a private channel.
-Start with `docs/REVIEWER_WALKTHROUGH.md`. All deployment evidence is in `docs/M8_DEPLOYMENT_EVIDENCE.md`.
+**Live:** https://frontdesk-arvo-support.onrender.com (Render Free + Supabase Free, synthetic data only).
+**Repository:** https://github.com/arjunajaygit/frontdesk. It is private, so reviewer access and demo accounts are granted through a private channel.
+Start with `docs/REVIEWER_WALKTHROUGH.md`. The requirement-by-requirement evidence is in `docs/FINAL_ASSESSMENT_COMPLIANCE.md`, the executed tests in `docs/FINAL_FUNCTIONAL_TEST_REPORT.md`, and the hosting evidence in `docs/M8_DEPLOYMENT_EVIDENCE.md`.
 
-**What was actually executed.**
-- *The five mandatory proofs* run on real PostgreSQL in CI on every push:
-  - PROOF-01: SLA clocks, calendar and escalation.
-  - PROOF-02: 9-agent HTTP claim race.
-  - PROOF-03: private-note isolation, including Playwright DOM and network checks.
-  - PROOF-04: DB-enforced append-only audit with role restrictions.
-  - PROOF-05: historical seed plus sweep, lifecycle and recovery.
-- *On the live site:*
-  - production smoke: 29/29;
-  - deployed workflows: 29/29 (claim race, privacy, lifecycle, linked tickets, scheduler auto-close);
-  - real-browser checks: 8/8;
-  - Supabase role verification: 9/9, with live denials of audit tampering and Data-API reads.
-- *Release chain:* gated build of one amd64 image, then Trivy, SBOM, keyless signature and attestation (verified independently). Before each deploy the exact manifest is re-scanned against the owner's conditional risk acceptance.
-- *Final audit:* all ten findings are reconciled in `docs/FINAL_AUDIT_RECONCILIATION.md`.
+## Not finished: assessment requirements
 
-**Deliberately not done / limits.**
-- *Free hosting sleeps when idle.* One measured cold start: about 39 s from request to response (a single sample). While asleep, Supabase Cron calls the authenticated sweep every 30 minutes (each slot verified at the HTTP and database level; one slot verifiably auto-closed an overdue ticket). Persisted SLA effects can therefore land up to about 30 minutes late; lateness itself is always computed from stored timestamps.
-- *Database TLS:* the runtime verifies the pooler certificate strictly. The one-time provisioning, migrations and seed ran encrypted but unverified.
-- *Residual image findings:* 38 Debian OS-package findings (11 advisories) have no upstream fix. They are accepted conditionally by the owner for this temporary deployment.
-- *Security tooling gaps:* CodeQL is skipped on the private repository (paid feature for private repos), so Semgrep is the SAST gate. ZAP runs as a passive baseline only, with no authenticated or active scan of the hosted demo.
-- *Not performed or not built:* a manual screen-reader pass (no WCAG conformance claim); text search and aggregate counts; distributed rate limiting (in-memory, single instance); an alert notification channel; a distroless runtime (evaluated, not adopted).
-- *Unexplained:* one integration failure in M2 was never reproduced or explained.
-- *Not observable through an API:* Render free-hour usage and Supabase's inactivity pause. The owner checks the dashboards during the review week.
+- **"Keep it running for one week."** It has been live since 22 November 2026, but a week has not passed, so I do not claim it. It runs on free tiers: the app sleeps when idle (one measured cold start took about 39 s). While it sleeps, SLA processing is triggered every 30 minutes by Supabase Cron, so a breach record or an automatic closure can be written up to about 30 minutes late. Lateness itself is always computed from stored timestamps, so it is never wrong when read.
+- **"About 8 hours. We prefer 8 honest hours."** I did not keep to this. I spent far more than 8 hours: several milestones with independent audits, database-level proofs, a signed and scanned release pipeline, a hosted deployment, a UI redesign and a final verification pass. Per-milestone times are recorded in `docs/IMPLEMENTATION_NOTES.md`. This was a choice, not an accident, but it goes against the stated preference.
 
-**Time.** The suggested eight-hour budget was substantially exceeded (a multi-milestone build with audits, proofs, DevSecOps and a
-hosted release). Actual times are recorded per milestone in `docs/IMPLEMENTATION_NOTES.md`.
+Every functional rule I extracted from the story was implemented and verified: the SLA table on working hours and holidays, pausing while waiting, auto-close, the reopen window, linked follow-ups, one screen for agents, replies and team-only notes, the three incidents, and the open question about changing to urgent. The rules are verified by unit, PostgreSQL-integration and real-browser tests and on the live site. Where the story was ambiguous, I chose an interpretation and documented it (`docs/DOMAIN_CONTRACT.md`, summarised in the compliance matrix §I). The main ones:
+- "same working day" for urgent means until 18:30 that day;
+- exact deadline equality is on time;
+- only an explicit "request information" pauses the clock;
+- the reopen window is 7 calendar days inclusive;
+- a priority change applies the new budget to the time already used, with no reset.
+
+## Not done: optional improvements, not required by the assessment
+
+- No manual screen-reader audit (automated axe and keyboard checks only), so no WCAG conformance claim.
+- No text search or aggregate ticket counts.
+- No email notifications. Frontdesk records when a reply became visible in the app; it does not claim delivery or read receipts.
+- Rate limiting is in-memory for a single instance; distributed limiting is not built.
+- Alerts are defined but no notification channel is wired. ZAP is a passive baseline only. CodeQL does not run on the private repository (Semgrep is the SAST gate). A distroless runtime was evaluated and not adopted.
+
+## Constraints and things I could not verify
+
+- **Residual image findings:** 38 OS-package findings across 11 advisories have no upstream fix. The owner accepted them conditionally for this temporary deployment, and they are re-scanned before every deploy.
+- **Database TLS:** the running app verifies the database certificate strictly. The one-time provisioning, migrations and seed ran encrypted but unverified.
+- **Free-tier limits:** Render free-hour usage and Supabase's inactivity pause cannot be read through an API; they are checked on the dashboards.
+- **Unexplained:** one integration-test failure early in the build (M2) was never reproduced or explained.
+
+## Found and fixed in the final audit
+
+- The opaque session-context header was written to verbose logs. It is now redacted.
+- Every production page logged a browser warning caused by an unrecognised security-header token. The token is removed.
+- An entrance animation made an automated contrast check intermittent. The animation is removed.
+
+All three have regression tests, and the full suite passes (integration 219/219, browser 49/49).

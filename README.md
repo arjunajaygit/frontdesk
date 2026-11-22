@@ -630,6 +630,17 @@ Read the full [deployment procedure](infrastructure/deploy/DEPLOYMENT.md) before
 
 The integration suite needs a running/test PostgreSQL environment; follow [testing strategy](docs/TESTING_STRATEGY.md). On first use, Playwright may require `npx playwright install`. Never run destructive test/seed commands against a production database.
 
+**Verify a live deployment** (no secrets are printed; reviewer accounts are only signed in, never modified):
+
+| Script | What it checks |
+| --- | --- |
+| `node scripts/smoke-prod.mjs --base <url> --creds <file>` | Cookies, HSTS, CSRF/Origin, privacy in detail and CSV, logout replay |
+| `OWNER_URL=… node scripts/hosted-verify.mjs --base <url> --creds <file>` | Workflows on synthetic tickets, checked against the database |
+| `OWNER_URL=… node scripts/hosted-browser.mjs --base <url> --creds <file>` | Real-browser privacy, two tabs, session restore, cross-tab sign-out |
+| `node scripts/hosted-runtime-health.mjs --base <url> --creds <file>` | Every screen at three widths: no console errors, failed assets or overflow |
+
+Results of the final audit: [functional test report](docs/FINAL_FUNCTIONAL_TEST_REPORT.md) and [assessment compliance matrix](docs/FINAL_ASSESSMENT_COMPLIANCE.md).
+
 ## Repository structure
 
 ```text
@@ -678,7 +689,7 @@ frontdesk/
 
 ## Further reading
 
-[Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md) · [High-level design](docs/HLD.md) · [Low-level design](docs/LLD.md) · [Database design](docs/DATABASE_DESIGN.md) · [Domain rules](docs/DOMAIN_CONTRACT.md) · [Auth contract](docs/AUTH_CONTRACT.md) · [Sweep contract](docs/SWEEP_CONTRACT.md) · [Security architecture](docs/SECURITY_ARCHITECTURE.md) · [DevSecOps](docs/DEVSECOPS.md) · [Risk register](docs/RISK_REGISTER.md) · [Engineering proofs](docs/ENGINEERING_PROOFS.md)
+[Assessment compliance](docs/FINAL_ASSESSMENT_COMPLIANCE.md) · [Functional test report](docs/FINAL_FUNCTIONAL_TEST_REPORT.md) · [Deployment evidence](docs/M8_DEPLOYMENT_EVIDENCE.md) · [Reviewer walkthrough](docs/REVIEWER_WALKTHROUGH.md) · [High-level design](docs/HLD.md) · [Low-level design](docs/LLD.md) · [Database design](docs/DATABASE_DESIGN.md) · [Domain rules](docs/DOMAIN_CONTRACT.md) · [Auth contract](docs/AUTH_CONTRACT.md) · [Sweep contract](docs/SWEEP_CONTRACT.md) · [Security architecture](docs/SECURITY_ARCHITECTURE.md) · [DevSecOps](docs/DEVSECOPS.md) · [Risk register](docs/RISK_REGISTER.md) · [Engineering proofs](docs/ENGINEERING_PROOFS.md)
 
 ---
 
