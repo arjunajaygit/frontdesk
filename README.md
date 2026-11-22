@@ -6,7 +6,6 @@ Frontdesk gives customers one place to ask for help and gives support agents a s
 
 [**Live demo**](https://frontdesk-arvo-support.onrender.com) · [**Reviewer walkthrough**](docs/REVIEWER_WALKTHROUGH.md) · [**API contract**](docs/openapi.draft.yaml) · [**Deployment guide**](infrastructure/deploy/DEPLOYMENT.md)
 
-> **Deployment status (22 November 2026):** The project owner reports that Frontdesk is deployed on Render with a Supabase database. The free web service can sleep when idle, so the first request may be slow. External scheduling/cold-start evidence is being finalized. Some older engineering notes still describe the original pre-deployment plan; those are kept as historical records. The link above is not an uptime guarantee.
 
 ## Contents
 
