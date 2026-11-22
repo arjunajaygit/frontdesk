@@ -19,10 +19,11 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok ? '' : `  -> ${detail}`}`);
   if (!ok) failures++;
 };
-const db = new pg.Client({
-  connectionString: process.env.OWNER_URL,
-  ssl: { rejectUnauthorized: false },
-});
+// TLS is VERIFIED against Supabase's root CA (committed, fingerprint-pinned) — never rejectUnauthorized:false.
+const SUPABASE_CA = readFileSync(
+  new URL('../infrastructure/deploy/supabase/supabase-prod-ca-2021.crt', import.meta.url),
+);
+const db = new pg.Client({ connectionString: process.env.OWNER_URL, ssl: { ca: SUPABASE_CA } });
 await db.connect();
 const fd010 = (await db.query(`SELECT id FROM "Ticket" WHERE subject LIKE '[FD-010]%'`)).rows[0].id;
 

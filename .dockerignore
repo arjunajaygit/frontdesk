@@ -12,6 +12,7 @@
 !prisma/credentials.ts
 !prisma/migrations/**
 !src/calendar.mjs
+!infrastructure/deploy/supabase/supabase-prod-ca-2021.crt
 **/node_modules
 **/dist
 **/*.tsbuildinfo

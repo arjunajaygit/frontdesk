@@ -78,10 +78,11 @@ const login = async (email) => {
   return s;
 };
 
-const db = new pg.Client({
-  connectionString: process.env.OWNER_URL,
-  ssl: { rejectUnauthorized: false },
-});
+// TLS is VERIFIED against Supabase's root CA (committed, fingerprint-pinned) — never rejectUnauthorized:false.
+const SUPABASE_CA = readFileSync(
+  new URL('../infrastructure/deploy/supabase/supabase-prod-ca-2021.crt', import.meta.url),
+);
+const db = new pg.Client({ connectionString: process.env.OWNER_URL, ssl: { ca: SUPABASE_CA } });
 await db.connect();
 const q = async (sql, p = []) => (await db.query(sql, p)).rows;
 const stamp = new Date().toISOString().replace(/[:.]/g, '');
