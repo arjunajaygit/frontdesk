@@ -64,7 +64,7 @@ A **ticket** is one customer's request for support. Frontdesk keeps the ticket, 
 | **Operations** | Health/readiness checks, structured logs, optional private metrics and monitoring. |
 | **Quality** | Unit, integration, browser and security tests; CI and signed-image release tooling. |
 
-### SLA policy in plain English
+### SLA policy 
 
 Working hours are **Monday–Friday, 09:30–18:30 Asia/Kolkata (IST)**, excluding explicitly configured holidays. Time is stored in UTC.
 
