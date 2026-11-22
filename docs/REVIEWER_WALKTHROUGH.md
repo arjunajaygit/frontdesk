@@ -1,9 +1,13 @@
 # Reviewer walkthrough (real behaviour only — no simulated clock)
 
 ## Hosted demo
-Pending deployment approval (see `infrastructure/deploy/DEPLOYMENT.md`). The live URL and the reviewer accounts are
-sent through the private submission channel — never committed. Free hosting sleeps after 15 idle minutes: the first
-request can take about a minute.
+**URL:** https://frontdesk-arvo-support.onrender.com — synthetic data only (15 scenario tickets FD-001..FD-015; tickets
+whose subject starts with `[verification` belong to a separate synthetic customer and were created by the deployment checks).
+Reviewer accounts (lead, agents, customers) are sent through the private submission channel — never committed.
+Free hosting sleeps after ~15 idle minutes, so the first request after a pause is slow (Render documents a delay of up to
+about a minute; not measured for this deployment). Scheduled SLA processing continues while the app sleeps: Supabase Cron
+calls the authenticated sweep endpoint every 30 minutes (see docs/M8_DEPLOYMENT_EVIDENCE.md).
+Times are IST; the scenario clock is real time (the seed was anchored to the deployment time, 2026-11-22).
 
 ## Run locally
 ```

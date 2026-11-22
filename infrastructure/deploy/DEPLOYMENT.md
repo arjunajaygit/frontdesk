@@ -46,7 +46,7 @@ Hosting choice and budget · domain (for B) · region · run `preflight.sql` on 
 - **Backups:** paid Render Postgres has provider backups (verify retention in the dashboard); the local logical procedure is `infrastructure/ops/backup-restore-verify.sh`.
 - **Recommendation for M8 approval:** option A (Render Docker web service 0.5c-512mb + Postgres 0.1c-256mb, same region), ≈ US$3.10 for the review week, **conditional on preflight.sql passing**; otherwise option B (small VM + this compose stack + Caddy TLS).
 
-## M8 zero-cost plan (proposed; awaiting approval — nothing provisioned)
+## M8 zero-cost deployment (executed 2026-11-22 under the owner's authorization; evidence: docs/M8_DEPLOYMENT_EVIDENCE.md)
 
 **Topology (Option A): Render Free web service (Docker image, same-origin SPA + API) + Supabase Free PostgreSQL.**
 Vercel is not used: it would add a cross-boundary proxy for cookies/CSRF with no benefit for a same-origin container.
@@ -60,21 +60,23 @@ pooler is IPv4 in session and transaction mode, session mode supports prepared s
 (supabase.com/docs: connecting-to-postgres, roles, hardening-data-api, pg_net, pricing). Not stated in the docs and
 therefore verified at preflight: pg_cron, pg_net and Vault availability on the Free plan.
 
-Procedure (each step needs the approval checkpoint):
+Procedure (as executed; each step had the approval checkpoint):
 
 1. Supabase: new isolated project (region near Render's), disable the Data API, note the session-pooler host.
 2. `01-provision.sql` as `postgres` (psql variables for passwords) → `prisma migrate deploy` as `frontdesk_owner` via the
-   session pooler (`frontdesk_owner.<ref>`, `sslmode=require`) → `02-post-migrate.sql` → `03-verify.sql` (all OK).
+   session pooler (`frontdesk_owner.<ref>`, verified TLS: `sslmode=verify-full` + `sslrootcert=infrastructure/deploy/supabase/supabase-prod-ca-2021.crt`
+   for psql; the 2026-11-22 run used `sslmode=require`, encrypted but unverified) → `02-post-migrate.sql` → `03-verify.sql` (all OK).
 3. Seed once, explicitly: `SEED_CREDENTIALS=write SEED_TARGET_LABEL=hosted ALLOW_DEMO_SEED=true` → `.local/credentials.hosted.json`
    (fresh random passwords; never the development ones).
 4. GitHub: create the approved repository from the sanitized candidate; run CI and Security; run `release.yml`
    (publish=true) for the exact SHA → signed amd64 digest in GHCR.
 5. Render: Free web service from that image digest (registry credential for a private package); env: `NODE_ENV=production`,
    `PUBLIC_ORIGIN=https://<service>.onrender.com`, `TRUST_PROXY_HOPS=1`, independent `JWT_SECRET`/`CSRF_SIGNING_KEY`/
-   `SWEEP_TRIGGER_TOKEN`, `DATABASE_URL=postgresql://frontdesk_app.<ref>:…@<pooler-host>:5432/postgres?sslmode=require&connection_limit=5`,
+   `SWEEP_TRIGGER_TOKEN`, `DATABASE_URL=postgresql://frontdesk_app.<ref>:…@<pooler-host>:5432/postgres?sslmode=require&sslcert=/app/certs/supabase-prod-ca-2021.crt&sslaccept=strict&connection_limit=5`
+   (the image ships Supabase's public root CA; `sslaccept=strict` verifies the pooler certificate chain and hostname),
    metrics disabled (`METRICS_PORT` unset), health check path `/api/healthz`.
 6. `04-cron.sql`: pg_cron job calling `POST /api/internal/sweep` (token in Vault, per-slot Idempotency-Key, 120 s timeout).
-   Proposed schedule every 30 minutes: the service sleeps between runs (no keep-alive pinging), each run wakes it, processes
+   Schedule every 30 minutes (active, jobid 1; verified per slot in M8_DEPLOYMENT_EVIDENCE.md): the service sleeps between runs (no keep-alive pinging), each run wakes it, processes
    due work as SYSTEM, and the in-process scheduler continues while awake. Granularity: breaches keep their exact
    deadline timestamps, but auto-close/expiry can be recorded up to one interval late.
 7. Verify externally (HTTPS): smoke suite, cookies Secure/HttpOnly, CSRF/Origin, revision via `/api/healthz`, scheduled

@@ -2,13 +2,13 @@ ID,Requirement,Module,Acceptance evidence,Status
 R01,Priority response / resolution SLA,SLA,T01 budgets and urgent day,"Domain (M2): tiers incl. urgent same-day, independent clocks, equality/+1ms, worked cases unit-tested; HTTP pending M3"
 R02,Working hours/weekends/holidays,Calendar,T02 Friday + holiday boundaries,"12 calendar tests + 14 adapter tests (ms precision, holidays, boundary overshoot fix); full integration M3"
 R03,Pause while waiting,SLA / conversation,T03 pause/resume across holiday,Domain (M2): explicit request only; pause/resume worked cases incl. holiday and exhausted/late clocks unit-tested
-R04,Auto-close after working week,Jobs,T04 restart / duplicate job / cutoff,Verified (M4 PROOF-05 + M2 domain/SQL boundary tests); deployed scheduler M8
+R04,Auto-close after working week,Jobs,T04 restart / duplicate job / cutoff,Verified (M4 PROOF-05 + M2 domain/SQL boundary tests); deployed: SYSTEM auto-close by the hosted scheduler (hosted-verify) and Supabase Cron slots verified (M8_DEPLOYMENT_EVIDENCE)
 R05,Reopen within window or new ticket,Tickets,T05 exact boundary and linked new,Verified (M4 PROOF-05/M3 HTTP + M2 boundary tests)
 R06,Agent screen and public/private composer,Web,T06 inbox/detail browser smoke,Verified (M5): staff workspace + public/private composers exercised in Playwright; 26 browser tests pass
-R07,INC-0291 single claim,Tickets,T07 nine concurrent claims / rollback,Verified (M4 PROOF-02); deployed check M8
+R07,INC-0291 single claim,Tickets,T07 nine concurrent claims / rollback,"Verified (M4 PROOF-02); deployed: 9-agent race on the live site, one 200 / eight 409 / one TICKET_CLAIMED (M8)"
 R08,INC-0304 no private disclosure,Auth / conversations,T08 public list/detail/export negative,Verified incl. browser (M5 PROOF-03): DOM + network bodies + exports + storage + back/forward
 R09,INC-0318 immutable who/what/when,Audit,T09 same transaction / DB grants,Verified (M4 PROOF-04 + M1 DB proofs)
-R10,Live week / repo / README / omissions,Ops,T10 production smoke and delivery,"Partial: UI, walkthrough docs done; live URL, README, SHORT_NOTE pending M8"
+R10,Live week / repo / README / omissions,Ops,T10 production smoke and delivery,"Live (M8): https://frontdesk-arvo-support.onrender.com, private repo, README, SHORT_NOTE, walkthrough; live-week upkeep and reviewer repo access are owner actions"
 A04,Priority change interpretation,SLA,T11 consumed time and breach preservation,Domain (M2): escalation/downgrade/paused/completed/equality/+1ms/episodes unit-tested
 P01,Escalation and prior breaches,SLA,"Active elapsed, paused and completed clock tests",PROOF-01 executed (M4): proof-01-sla + unit domain + 12 kernel tests pass
 P02,Exclusive claim,Tickets,2 and 9 concurrent HTTP claims real PG; audit rollback,"PROOF-02 executed (M4): 5x2 + 5x9 forced-overlap HTTP races, one 200/rest 409, one claim event; DB trigger rollback; losers 403"
@@ -18,8 +18,8 @@ P05,Lifecycle demo,Jobs/Web,"Seed, sweep lock, reopen, idempotency","PROOF-05 ex
 R11,Explain which tickets were late and why,SLA/Audit/UI,"Reconstruct deadlines, pauses, priority revisions, onset and recorded time",Verified (M5): the late-ticket explanation is built from audit events and browser-tested
 R12,Prove public reply publication in Frontdesk,Conversations/Audit,Message visible after commit; event timestamp and actor; no external receipt claim,Verified (M5): publication time shown from MESSAGE_PUBLISHED; no delivery claim
 A10,Intake and actor/lifecycle matrix,Tickets/Auth,"Atomic intake, exact cutoff, linked child, role/ownership","Partial (M3): atomic intake (customer/staff), actor matrix enforced via HTTP (401/403/404/409)"
-A11,"Session rotation, CSRF, Origin and privacy",Auth/API,"Rotation replay, revocation, role, cookie and proxy tests",Verified locally (M3 + M4 M02 regressions); deployed proxy M8
-A12,Sweep progress and recovery,Jobs/DB,"Backlog, overlap, crash, expired lease fencing, terminal replay",Verified (M4 PROOF-05 + H01/M04 regressions); host recovery M8
+A11,"Session rotation, CSRF, Origin and privacy",Auth/API,"Rotation replay, revocation, role, cookie and proxy tests","Verified locally (M3 + M4 M02 regressions) and deployed: smoke 29/29 incl. Secure/HttpOnly/SameSite, HSTS, CSRF/Origin, logout replay (M8)"
+A12,Sweep progress and recovery,Jobs/DB,"Backlog, overlap, crash, expired lease fencing, terminal replay",Verified (M4 PROOF-05 + H01/M04 regressions); deployed: external cron invocations persisted COMPLETED with per-slot keys (M8)
 A13,Strict nullable API and privacy errors,API,"OpenAPI aware validation, null values, staff-only claim name",Partial (M3): every HTTP response family validated against OpenAPI schemas in tests; claim conflict scoped to staff claim
 A14,Typed audit payloads,Audit/API/UI,"Action-specific union, strict safe writes, reconstruction",Partial (M3): OpenAPI-generated runtime schema enforced at write and read; sweep zod schemas
 A15,Startup configuration and proxy,Auth/Deployment,"Independent keys, exact origin, cookie paths, revocation, no-store",Partial (M3): startup validation + cookie flags/paths/CSRF/Origin/no-store over HTTP; deployed proxy M8
@@ -43,9 +43,9 @@ M7-10,Distroless runtime evaluation,Container,docs/M7_EVIDENCE.md §9,Deferred
 M7-11,Manual VoiceOver verification,UI,docs/ACCESSIBILITY_VOICEOVER_CHECKLIST.md,Not performed
 M8-H01,"Session restoration, login CSRF, confirmed logout",Auth/Web,sessions.spec.ts + final-audit-auth.test.ts + api.session.test.ts,Executed
 M8-H02,Server-enforced session binding for tabs (no cross-identity retries),Auth/Web,"sessions.spec.ts (two tabs, one context; mutation-tested) + final-audit-auth.test.ts",Executed
-M8-H03,"Gated release: approved ref, exact SHA, passing checks, one amd64 artifact, digest-verified signing",CI/CD,tests/release/release-gate.test.mjs + workflows.test.ts,Logic executed; remote run pending
-M8-H04,Sanitized publication candidate,Release,scripts/build-publication.sh + Gitleaks on candidate,Prepared; publication pending approval
-M8-H05,Hosted submission,Deploy,DEPLOYMENT.md M8 plan; Supabase rehearsal,Open (needs approval + live verification)
+M8-H03,"Gated release: approved ref, exact SHA, passing checks, one amd64 artifact, digest-verified signing",CI/CD,tests/release/release-gate.test.mjs + workflows.test.ts,"Executed remotely: release runs 44995728324, 45017938581; signature + attestation verified independently"
+M8-H04,Sanitized publication candidate,Release,scripts/build-publication.sh + Gitleaks on candidate,Executed: sanitized history published (private repo); Gitleaks full history passes in CI
+M8-H05,Hosted submission,Deploy,DEPLOYMENT.md M8 plan; Supabase rehearsal,Verified live (M8_DEPLOYMENT_EVIDENCE.md); cold start UNKNOWN; reviewer repo access pending owner
 M8-M01,Principal-keyed rate limiting,API,final-audit-auth.test.ts + rate-limiter.test.ts + k6 mixed (0 x 429),Executed
 M8-M02,Serialised credential-producing operations,Seed/Ops,seed-concurrency.test.ts (real processes),Executed
 M8-M03,Shutdown drain before DB disconnect,Scheduler,shutdown-drain.test.ts (real SIGTERM),Executed

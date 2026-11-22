@@ -9,13 +9,13 @@ are documentation only unless noted).
 |---|---|---|
 | H01 Session restoration and logout | HIGH | FIXED AND VERIFIED |
 | H02 Stale tabs and cross-identity retries | HIGH | FIXED AND VERIFIED |
-| H03 Unverified artifact publication and signing | HIGH | FIXED (workflow + gate logic tested); remote execution PENDING authorisation |
-| H04 Confidential materials in Git history | HIGH (publication) | PREPARED (sanitized candidate built and scanned); publication PENDING approval |
-| H05 Hosted submission incomplete | HIGH | OPEN until live deployment is verified |
+| H03 Unverified artifact publication and signing | HIGH | FIXED AND VERIFIED (remote release runs 44995728324 and 45017938581; deployed digest signature + SBOM attestation also verified independently with cosign) |
+| H04 Confidential materials in Git history | HIGH (publication) | FIXED AND VERIFIED (sanitized history published to the private repository; Gitleaks full-history gate passes on every push) |
+| H05 Hosted submission incomplete | HIGH | VERIFIED: live deployment passed the deployed gates (docs/M8_DEPLOYMENT_EVIDENCE.md). Remaining: reviewer repository access (owner action); cold start UNKNOWN |
 | M01 Shared-IP rate limiting | MEDIUM | FIXED AND VERIFIED |
 | M02 Concurrent seed credential consistency | MEDIUM | FIXED AND VERIFIED |
 | M03 Scheduler shutdown ordering | MEDIUM | FIXED AND VERIFIED |
-| M04 Residual OS-package CVE applicability | MEDIUM (evidence gap) | FIXED (per-advisory report for the amd64 artifact); risk decisions PENDING owner |
+| M04 Residual OS-package CVE applicability | MEDIUM (evidence gap) | FIXED; owner conditionally accepted the 11 advisories / 38 findings for this synthetic-data deployment; exact manifest re-scanned before each deploy (2026-11-22: unchanged, no fix) |
 | L01 Scheduler metrics correctness | LOW | FIXED AND VERIFIED |
 
 ## H01 — Session restoration and logout

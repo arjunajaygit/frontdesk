@@ -91,3 +91,34 @@ V3.2: follow-up audit corrected at contract level. Draft schema, SQL, API and en
   smoke, kernel, argon2/Prisma on x64, non-root, read-only, scheduler without traffic, SIGTERM drain 143, Trivy, SBOM).
 - Not done without approval: any external resource, repository, publication, signing or deployment.
 - Time: M8-A ≈ 2 h 55 min wall clock (about 08:35–11:28 IST on 2026-11-22, including a usage-limit pause); no incident recovery. Publication candidate: ../frontdesk-v3.2-publication commit e701ec7 (from 6b086f1), Gitleaks history + dir clean, fast gates pass in isolation. Local disk after amd64 emulated builds: 6.2 GiB free (Docker build cache; no global prune performed).
+
+### M8-B/C (2026-11-22): zero-cost deployment, live verification, submission
+**Executed, under the owner's written authorization.**
+- Private repository with the sanitized history.
+- CI and Security on the publication SHAs.
+- Release workflow: gate → amd64 build → smoke → Trivy → SBOM → publish → digest match → keyless sign + attest → verify.
+- An isolated Supabase Free project: provisioned, migrated, verified 9/9, seeded once.
+- A Render Free service deployed by digest from private GHCR.
+- A 30-minute Supabase Cron sweep with the token held in Vault.
+- Dependabot cleanup within the authorized scope.
+
+**Live results (revision `9cadd0b`, digest `b5ef0a7f…`).** Smoke 29/29, workflows 29/29, browser 8/8, and 0 px of empty page scroll. The external cron slots at 11:30 and 12:00 each returned HTTP 200 and persisted a COMPLETED invocation. Cold start is UNKNOWN. Full detail is in M8_DEPLOYMENT_EVIDENCE.md.
+
+**Failures found and fixed (none bypassed).**
+- *First CI runs:* contracts build missing in the integration job; k6 origin; a flaky metrics regex; one suite writing to the shared template DB; PROOF-02 pool size on 2-vCPU runners.
+- *Hosted-verify assumptions:* the script assumed 201 for replies and notes (the contract says 200), and that ticket events carry the sweep ID (they correlate via `SWEEP_STARTED` instead).
+- *User-reported empty page scroll:* `sr-only` labels escaped the pane scrollers because no positioned ancestor existed. Fixed, and guarded by an e2e assertion that fails at 891–1,051 px when the fix is reverted.
+- *TLS:* Semgrep blocked `rejectUnauthorized: false` in my new verification scripts. Review then showed the runtime database connection was also unverified, so both now verify against Supabase's pinned root CA (negative tests pass).
+
+**Mistakes and process notes.**
+- A `sleep`-based cold-start test never completed because the Mac slept. Those processes were stopped and the results were taken from logs instead.
+- My own browsing of the live site once woke the instance and would have invalidated an asleep test. Those waiters were stopped and the test rescheduled.
+- The persisted cron-processing test was redesigned around the scheduler's fixed phase rather than sleep, because the instance stayed awake.
+
+**Coordination.** The owner's README PR (#12) was merged after all its checks passed on the updated head, and its README is now the source of truth here. The frontend redesign went to a separate branch and worktree and was opened as PR #13 and merged at the owner's request after all checks passed (`2476934`). It is not part of deployed revision `9cadd0b`.
+
+**Open (owner).**
+- Grant reviewer repository access.
+- Check Render free hours and Supabase inactivity during the live week.
+- Dependabot PR #11.
+- Decide whether to release the merged redesign to the live site (that requires a new gated release and live re-verification).
