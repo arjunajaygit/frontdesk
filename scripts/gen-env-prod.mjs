@@ -2,15 +2,7 @@
 // Independent random secrets; NEVER overwrites an existing value (an existing file only gains keys it lacks, e.g.
 // METRICS_TOKEN added in M7); never prints secret values.
 // Usage: node scripts/gen-env-prod.mjs [--origin https://frontdesk.example.com] [--port 8080]
-import {
-  closeSync,
-  constants,
-  existsSync,
-  openSync,
-  readFileSync,
-  writeSync,
-  writeFileSync,
-} from 'node:fs';
+import { closeSync, constants, openSync, readFileSync, writeSync, writeFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
 const arg = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
@@ -24,10 +16,15 @@ const later = {
   METRICS_TOKEN: () => randomBytes(32).toString('base64url'),
   GRAFANA_ADMIN_PASSWORD: pw,
 };
-if (existsSync(target)) {
-  // One descriptor for read + append, opened without following symlinks: the file that was inspected is the file
-  // that gains keys (no read-then-reopen race; CodeQL js/file-system-race).
-  const fd = openSync(target, constants.O_RDWR | constants.O_APPEND | constants.O_NOFOLLOW);
+// No existence pre-check (CodeQL js/file-system-race): try to open an existing file for read + append through ONE
+// descriptor without following symlinks; only ENOENT means "create it", and that create is exclusive ('wx').
+let fd = null;
+try {
+  fd = openSync(target, constants.O_RDWR | constants.O_APPEND | constants.O_NOFOLLOW);
+} catch (e) {
+  if (e.code !== 'ENOENT') throw e; // ELOOP for a symlink, EACCES, ... are refused, never followed or overwritten
+}
+if (fd !== null) {
   let missing;
   try {
     const have = new Set(
