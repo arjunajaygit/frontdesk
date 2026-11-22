@@ -23,5 +23,15 @@ text = text
   .replace('POSTGRES_BOOTSTRAP_PASSWORD=REPLACE_ME', `POSTGRES_BOOTSTRAP_PASSWORD=${v.boot}`)
   .replace('FRONTDESK_OWNER_PASSWORD=REPLACE_ME', `FRONTDESK_OWNER_PASSWORD=${v.owner}`)
   .replace('FRONTDESK_APP_PASSWORD=REPLACE_ME', `FRONTDESK_APP_PASSWORD=${v.app}`);
-writeFileSync(target, text, { mode: 0o600 });
+// 'wx' = exclusive create: fails if anything (file or symlink) appeared since the check above, so secrets are
+// never written through a planted path (CodeQL js/file-system-race).
+try {
+  writeFileSync(target, text, { mode: 0o600, flag: 'wx' });
+} catch (e) {
+  if (e.code === 'EEXIST') {
+    console.log('.env already exists; leaving it untouched.');
+    process.exit(0);
+  }
+  throw e;
+}
 console.log('.env written (mode 600). Secrets are not printed.');

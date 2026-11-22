@@ -4,6 +4,11 @@ import { readFileSync } from 'node:fs';
 
 const arg = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
 const BASE = arg('--base', 'http://localhost:8080').replace(/\/$/, '');
+// Credentials are only ever sent to the deployment under test over HTTPS (or to a loopback dev stack).
+if (!/^https:\/\//.test(BASE) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(BASE)) {
+  console.error('Refusing to send credentials to a non-HTTPS, non-loopback --base.');
+  process.exit(2);
+}
 const CREDS = JSON.parse(
   readFileSync(arg('--creds', '.local/credentials.prod-compose.json'), 'utf8'),
 );

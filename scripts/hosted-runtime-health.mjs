@@ -8,6 +8,11 @@ import { chromium } from '@playwright/test';
 
 const arg = (n) => process.argv[process.argv.indexOf(n) + 1];
 const BASE = arg('--base').replace(/\/$/, '');
+// Credentials are only ever sent to the deployment under test over HTTPS (or to a loopback dev stack).
+if (!/^https:\/\//.test(BASE) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(BASE)) {
+  console.error('Refusing to send credentials to a non-HTTPS, non-loopback --base.');
+  process.exit(2);
+}
 const CREDS = JSON.parse(readFileSync(arg('--creds'), 'utf8'));
 const LEAD = 'meera.iyer@arvo.example';
 const CUSTOMER = 'aarav.menon@customer.example';
