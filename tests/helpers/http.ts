@@ -79,7 +79,7 @@ export class Browser {
   readonly agent: TestAgent;
   csrf = '';
   viewer: { id: string; displayName: string; role: string } | null = null;
-  /** Opaque session context echoed as X-Session-Context, exactly like the real client (H02). */
+  /** Opaque session context echoed as X-Session-Context, exactly like the real client. */
   sessionContext = '';
 
   constructor(server: TestApp['server']) {

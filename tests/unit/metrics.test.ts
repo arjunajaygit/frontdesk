@@ -164,7 +164,7 @@ describe('metrics: commit-only counting and bounded, private labels', () => {
     );
   });
 
-  it('L01: a manual sweep never updates the scheduled-success gauge (cannot hide a dead scheduler); external SYSTEM triggers do', async () => {
+  it('a manual sweep never updates the scheduled-success gauge (cannot hide a dead scheduler); external SYSTEM triggers do', async () => {
     const m = newMetrics();
     m.sweepFinished('LEAD', 'completed', 0.1, false);
     expect(await metric(m, 'frontdesk_sweep_last_scheduled_success_timestamp_seconds')).toBe(0);

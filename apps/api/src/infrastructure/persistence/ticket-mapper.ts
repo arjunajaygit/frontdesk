@@ -104,10 +104,10 @@ export function messageToRow(m: NewMessage): Prisma.MessageUncheckedCreateInput 
   return { ...m, createdAt: new Date(m.createdAt) };
 }
 
-/** Ticket-target audit row. `id`, `correlationId` and `eventKey` defaults are supplied by the caller (M3). */
+/** Ticket-target audit row. `id`, `correlationId` and `eventKey` defaults are supplied by the caller. */
 export function auditToRow(
   e: TicketDomainEvent,
-  /** recordedAt: actual append time (M03); defaults to the logical time for historical seed replay only. */
+  /** recordedAt: actual append time; defaults to the logical time for historical seed replay only. */
   envelope: { id: string; correlationId: string; eventKey?: string | null; recordedAt?: Date },
 ): Prisma.AuditEventUncheckedCreateInput {
   return {

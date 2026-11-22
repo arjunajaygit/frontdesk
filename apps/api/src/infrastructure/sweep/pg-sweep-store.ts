@@ -27,7 +27,7 @@ export interface SweepStoreHooks {
   beforeLeaseWrite?: (op: LeaseWriteOp, tx: Prisma.TransactionClient) => Promise<void>;
 }
 
-/** Time budget for candidate scans (M04); never longer than this even when more invocation time remains. */
+/** Time budget for candidate scans; never longer than this even when more invocation time remains. */
 const MAX_SCAN_MS = 5_000;
 
 export type SweepInitiator = { type: 'SYSTEM' } | { type: 'LEAD' | 'ADMIN'; id: string };
@@ -74,7 +74,7 @@ const counters = (r: InvocationRow): SweepCounters => ({
 /**
  * PostgreSQL invocation bookkeeping + candidate selection (SWEEP_CONTRACT). Times come from
  * clock_timestamp() truncated to ms; no caller-supplied time is ever trusted. Locks only the invocation
- * row (never global); the per-ticket processor (M3) calls `verifyLease` inside its own transaction.
+ * row (never global); the per-ticket processor calls `verifyLease` inside its own transaction.
  */
 export class PgSweepStore implements SweepInvocationStore, SweepCandidateSource {
   constructor(
@@ -112,7 +112,7 @@ export class PgSweepStore implements SweepInvocationStore, SweepCandidateSource 
 
   /**
    * Read-only scan under transaction-local statement/lock timeouts derived from the remaining invocation
-   * budget (M04): a blocked scan fails fast (57014/55P03) instead of pinning the scheduler.
+   * budget: a blocked scan fails fast (57014/55P03) instead of pinning the scheduler.
    */
   private bounded<T>(budgetMs: number, fn: (tx: Tx) => Promise<T>): Promise<T> {
     const ms = String(Math.max(50, Math.min(MAX_SCAN_MS, Math.floor(budgetMs))));
@@ -125,7 +125,7 @@ export class PgSweepStore implements SweepInvocationStore, SweepCandidateSource 
     );
   }
 
-  /** Index-friendly union; each branch matches one of the M1 indexes (incl. partial sla_unprocessed_due_idx). */
+  /** Index-friendly union; each branch matches one of the baseline-migration indexes (incl. partial sla_unprocessed_due_idx). */
   private dueUnion(snap: Date): Prisma.Sql {
     return Prisma.sql`
       SELECT t.id::text AS id, t."waitingCloseDueAt" AS due FROM "Ticket" t
@@ -200,7 +200,7 @@ export class PgSweepStore implements SweepInvocationStore, SweepCandidateSource 
   // ------------------------------------------------------------------ fencing
 
   /**
-   * Lease predicate evaluated INSIDE the write statement (H01): identity, RUNNING, token equality and the
+   * Lease predicate evaluated INSIDE the write statement: identity, RUNNING, token equality and the
    * statement's own advancing clock_timestamp() strictly before leaseUntil (equality = expired).
    */
   private leaseGuard(lease: InvocationLease): Prisma.Sql {

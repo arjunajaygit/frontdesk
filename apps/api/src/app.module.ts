@@ -47,7 +47,7 @@ import { UnitOfWork } from './tickets/unit-of-work';
         genReqId: (req: IncomingMessage) => (req as IncomingMessage & { id?: string }).id ?? randomUUID(),
         // Never log credentials, cookies, CSRF tokens or bodies (bodies are not serialised by pino-http).
         redact: {
-          // x-session-context: opaque per-session binding tag (H02). Not a credential, but session-correlated, so never
+          // x-session-context: opaque tag that binds a browser tab to its own session. Not a credential, but session-correlated, so never
           // logged (found by tests/e2e/log-safety.spec.ts).
           paths: ['req.headers.cookie', 'req.headers.authorization', 'req.headers["x-csrf-token"]', 'req.headers["x-session-context"]', 'req.headers["idempotency-key"]', 'res.headers["set-cookie"]'],
           censor: '[REDACTED]',

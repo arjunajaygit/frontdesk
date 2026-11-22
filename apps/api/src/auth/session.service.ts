@@ -66,7 +66,7 @@ export class SessionService implements OnModuleInit {
     const outcome = await this.db.$transaction(
       async (tx) => {
         // Lock FIRST without validity predicates (they would be evaluated before any lock wait), then sample
-        // fresh DB time and re-validate revocation + absolute expiry under the lock (M02).
+        // fresh DB time and re-validate revocation + absolute expiry under the lock, so a logout that committed while we waited is honoured.
         const locked = await tx.$queryRaw<{ revokedAt: Date | null; expiresAt: Date }[]>`
           SELECT "revokedAt", "expiresAt" FROM "Session" WHERE id = ${parsed.sessionId} FOR UPDATE`;
         const clock = await tx.$queryRaw<{ now: Date }[]>`SELECT date_trunc('milliseconds', clock_timestamp()) AS now`;

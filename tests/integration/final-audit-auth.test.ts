@@ -5,7 +5,7 @@ import { Browser, ORIGIN, newKey, signedIn, startApp, TestApp } from '../helpers
 import { TEST_PASSWORD, cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * Final audit H01 (session restore / login CSRF / logout revocation) and H02 (stale tab acting through a
+ * Session restore / login CSRF / logout revocation, and stale-tab protection (a stale tab acting through a
  * replacement session) on REAL PostgreSQL through the real HTTP pipeline. One supertest agent = one browser cookie
  * jar shared by "tabs"; each tab remembers only its own CSRF token + session context, exactly like the SPA.
  */
@@ -70,7 +70,7 @@ const cookieValue = (res: request.Response, name: string) =>
     ?.split(';')[0]
     ?.slice(name.length + 1);
 
-describe('H01: login CSRF, prior-session revocation, logout revocation', () => {
+describe('login CSRF, prior-session revocation, logout revocation', () => {
   it('purpose=login always yields a PRE-LOGIN token, even with a valid session; logging in again revokes the old session', async () => {
     const jar = request.agent(t.server);
     const first = await signIn(jar, CUST_A);
@@ -126,7 +126,7 @@ describe('H01: login CSRF, prior-session revocation, logout revocation', () => {
   });
 });
 
-describe('H02: a stale tab can never act or read through a replacement session (server-enforced)', () => {
+describe('a stale tab can never act or read through a replacement session (server-enforced)', () => {
   const scenarios: Array<[string, string, string, 'customer' | 'staff']> = [
     ['customer A replaced by customer B', CUST_A, CUST_B, 'customer'],
     ['staff replaced by another staff member', AGENT_A, AGENT_B, 'staff'],
@@ -249,7 +249,7 @@ describe('H02: a stale tab can never act or read through a replacement session (
   });
 });
 
-describe('M01: principal-keyed limits for signed-in traffic; strict per-IP limits for unauthenticated traffic', () => {
+describe('rate limits: principal-keyed limits for signed-in traffic; strict per-IP limits for unauthenticated traffic', () => {
   let lt: TestApp;
   let ldb: string;
   beforeAll(async () => {
@@ -298,7 +298,7 @@ describe('M01: principal-keyed limits for signed-in traffic; strict per-IP limit
   });
 });
 
-describe('M01: strict per-IP limits for unauthenticated traffic', () => {
+describe('rate limits: strict per-IP limits for unauthenticated traffic', () => {
   let lt: TestApp;
   let ldb: string;
   beforeAll(async () => {
@@ -337,7 +337,7 @@ describe('M01: strict per-IP limits for unauthenticated traffic', () => {
   });
 });
 
-describe('M01: trusted proxy honours only the proxy-appended address', () => {
+describe('rate limits: trusted proxy honours only the proxy-appended address', () => {
   let pt: TestApp;
   let pdb: string;
   beforeAll(async () => {

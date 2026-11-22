@@ -8,7 +8,7 @@ import { roleUrl, runNode, SEED_ANCHOR } from '../helpers/db';
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
 /**
- * M5 overwrite incident regression, end to end on real PostgreSQL: the seed must never leave a password hash
+ * Credentials-file overwrite incident regression, end to end on real PostgreSQL: the seed must never leave a password hash
  * whose plaintext was not recorded, and a refused credential write must happen BEFORE any user is created.
  */
 describe('seed credential recording (real PostgreSQL)', () => {
@@ -114,7 +114,7 @@ describe('seed credential recovery after a database failure that follows the cre
     if (db) await dropDatabase(db);
   });
 
-  it('a failure after the write strands no login: user creation is all-or-nothing (M8), so no hash exists without its recorded password', async () => {
+  it('a failure after the write strands no login: user creation is all-or-nothing, so no hash exists without its recorded password', async () => {
     const run = seed();
     expect(run.status).not.toBe(0);
     const created = await users();

@@ -102,7 +102,7 @@ export function configureApp(app: NestExpressApplication, config: AppConfig): vo
   const limiter = app.get(RateLimiter);
   app.use('/api', (req: Request, _res: Response, next: NextFunction) => {
     try {
-      // Coarse pre-authentication flood ceiling per IP (M01). Per-user and unauthenticated budgets are in AuthGuard.
+      // Coarse pre-authentication flood ceiling per IP. Per-user and unauthenticated budgets are in AuthGuard.
       limiter.consume(`api:ip:${req.ip}`, config.API_IP_RATE_LIMIT_PER_MIN);
       next();
     } catch (e) {

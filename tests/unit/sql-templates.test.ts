@@ -30,7 +30,7 @@ describe('SQL templates are the executed migrations (no drift)', () => {
       });
   });
 
-  it('migrations are ordered baseline -> constraints -> immutability/grants -> retention -> function hardening (M8)', () => {
+  it('migrations are ordered baseline -> constraints -> immutability/grants -> retention -> function hardening', () => {
     expect(migrations.map((m) => m.replace(/^\d+_/, ''))).toEqual([
       'baseline_schema',
       'domain_constraints',

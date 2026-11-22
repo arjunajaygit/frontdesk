@@ -3,7 +3,7 @@ import { E2E_PASSWORD, USERS, WEB_ORIGIN } from './helpers/env';
 import { db, loginUi } from './helpers/ui';
 
 /**
- * Final audit H01 (restore / logout) and H02 (stale tabs) in a REAL browser. Every multi-tab test uses TWO PAGES
+ * Session restoration / logout and stale-tab protection in a REAL browser. Every multi-tab test uses TWO PAGES
  * IN ONE BROWSER CONTEXT (shared cookie jar), and verifies persisted database truth, not only the UI.
  */
 let fd010: string;
@@ -55,7 +55,7 @@ async function apiLoginAs(ctx: BrowserContext, email: string) {
 const nudge = (page: Page) =>
   page.evaluate(() => document.dispatchEvent(new Event('visibilitychange'))); // tab returns to the foreground
 
-test.describe('H01: session restoration and logout', () => {
+test.describe('session restoration and logout', () => {
   test('reload with an expired access token and a valid refresh session restores the viewer (one rotation)', async ({
     browser,
   }) => {
@@ -162,7 +162,7 @@ test.describe('H01: session restoration and logout', () => {
   });
 });
 
-test.describe('H02: two tabs, one browser — identity changes', () => {
+test.describe('two tabs, one browser — identity changes', () => {
   test('customer A replaced by customer B: A’s pending draft is rejected by the server, nothing persists, A’s content disappears', async ({
     browser,
   }) => {

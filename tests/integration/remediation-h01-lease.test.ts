@@ -11,7 +11,7 @@ import { LockHolder, Observer } from '../helpers/observe';
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
 /**
- * H01 regression: every lease-sensitive write is fenced by a guarded UPDATE evaluated with the statement's own
+ * Lease fencing: every lease-sensitive write is fenced by a guarded UPDATE evaluated with the statement's own
  * advancing clock_timestamp(). A test-only hook pauses the worker AFTER it holds the invocation row lock and
  * BEFORE the guarded write, until PostgreSQL's clock has passed leaseUntil (deterministic, DB-time barrier).
  */
@@ -69,7 +69,7 @@ const expireDuring = (op: LeaseWriteOp, lease: InvocationLease) => {
   plan = { op, action: async () => observer.untilDbTimeAfter((await row(lease.id)).leaseUntil) };
 };
 
-describe('H01: lease expiry between verification and the write is fenced in the write itself', () => {
+describe('lease expiry between verification and the write is fenced in the write itself', () => {
   it('renewal: expires after the lock is held, before renewal -> false, leaseUntil unchanged', async () => {
     const lease = await reserve();
     const before = (await row(lease.id)).leaseUntil.getTime();
@@ -144,7 +144,7 @@ describe('H01: lease expiry between verification and the write is fenced in the 
   });
 });
 
-describe('H01: a ticket transaction whose final lease fence fails rolls back completely', () => {
+describe('a ticket transaction whose final lease fence fails rolls back completely', () => {
   let t: TestApp;
   beforeAll(async () => {
     t = await startApp(db, {}, (b) =>

@@ -5,7 +5,7 @@ import { LockHolder, Observer } from '../helpers/observe';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * PROOF-02 / INC-0291 — exclusive claiming under REAL PostgreSQL contention.
+ * INC-0291 — exclusive claiming under REAL PostgreSQL contention.
  * Overlap is forced and observed: a barrier transaction holds the ticket row; every contender's request is
  * confirmed (pg_stat_activity, wait_event_type=Lock) to be blocked inside PostgreSQL on that row before the
  * barrier is released. Contenders are independently authenticated sessions; the app pool gives each its own
@@ -75,7 +75,7 @@ async function race(n: number) {
   return { id, observed, responses, contenders };
 }
 
-describe.each([2, 9])('PROOF-02: %i independently authenticated agents, forced overlap', (n) => {
+describe.each([2, 9])('claim: %i independently authenticated agents, forced overlap', (n) => {
   it.each(Array.from({ length: REPS }, (_, i) => i + 1))(
     `repetition %i/${REPS}: one 200, ${n - 1} x 409, one assignee, one claim event`,
     async () => {
@@ -120,7 +120,7 @@ describe.each([2, 9])('PROOF-02: %i independently authenticated agents, forced o
   );
 });
 
-describe('PROOF-02: database-level audit rejection rolls the claim back atomically', () => {
+describe('claim: database-level audit rejection rolls the claim back atomically', () => {
   it('a real PostgreSQL trigger rejects the TICKET_CLAIMED insert -> nothing persists; after removal a retry succeeds', async () => {
     const id = await openTicket();
     // Isolated failure injection (scratch DB only), scoped to this ticket's claim event.

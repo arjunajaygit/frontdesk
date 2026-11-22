@@ -3,7 +3,7 @@
  * readable by script, and nothing is written to localStorage/sessionStorage. CSRF token and session context live
  * in memory only.
  *
- * Session binding (final audit H01/H02): every request carries `X-Session-Context`, the opaque context of the
+ * Session binding: every request carries `X-Session-Context`, the opaque context of the
  * session THIS tab was rendered for. Tabs share cookies; if another tab signs in as someone else, the server
  * answers 409 SESSION_CHANGED instead of acting as (or reading as) the replacement identity. Locally, an `epoch`
  * counter increments on every session change: in-flight requests are aborted and no retry (CSRF or refresh) that
@@ -179,7 +179,7 @@ export function refreshSession(): Promise<void> {
 
 /**
  * Startup / revalidation: who are the cookies signed in as? One coordinated refresh when the access token has
- * expired (H01: previously /auth/me was excluded from refresh, stranding valid refresh sessions). Returns null when
+ * expired (previously /auth/me was excluded from refresh, which stranded valid refresh sessions). Returns null when
  * there is no usable session. Never loops: at most one refresh, then one re-read.
  */
 export async function restoreSession(): Promise<CurrentSessionDto | null> {

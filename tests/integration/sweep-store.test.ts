@@ -15,7 +15,7 @@ import { loadSpec, makeValidator } from '../helpers/openapi';
 
 /**
  * Real PostgreSQL, single-connection behaviour of the sweep selection and invocation bookkeeping, executed as
- * the restricted runtime role. Overlapping workers, crash-after-commit and per-ticket transactions are M3/M4.
+ * the restricted runtime role. Overlapping workers, crash-after-commit and per-ticket transactions are covered by proof-05-lifecycle.test.ts.
  */
 const anchor = Date.parse(SEED_ANCHOR);
 let db: PrismaClient;
@@ -219,7 +219,7 @@ describe('invocation reservation, fencing and recovery (single connection)', () 
   it('expired lease: worker is fenced; recovery terminalises once with SWEEP_LEASE_EXPIRED and preserves committed counters', async () => {
     const r = await reserve('manual-0003');
     if (r.kind !== 'RESERVED') throw new Error(r.kind);
-    // Simulated committed per-ticket progress (the M3 processor commits these with domain changes).
+    // Simulated committed per-ticket progress (the per-ticket processor commits these with domain changes).
     await owner.query(
       `UPDATE "SweepInvocation" SET processed=2, "autoClosed"=1, "breachesRecorded"=1 WHERE id=$1`,
       [r.lease.id],

@@ -6,7 +6,7 @@ import { Browser } from '../helpers/http';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * H04: the app must refuse to start unless the EFFECTIVE database identity is a restricted runtime role.
+ * The app must refuse to start unless the EFFECTIVE database identity is a restricted runtime role.
  * Test roles are created by the test-only bootstrap superuser inside the dedicated Frontdesk cluster and are
  * always dropped afterwards (names are run-unique).
  */
@@ -70,7 +70,7 @@ afterAll(async () => {
   }
 });
 
-describe('H04: startup verifies the effective runtime identity and privileges', () => {
+describe('startup verifies the effective runtime identity and privileges', () => {
   it('the intended restricted runtime role starts and is ready', async () => {
     expect(await bootWith({})).toEqual({ ok: true, message: '' });
   });

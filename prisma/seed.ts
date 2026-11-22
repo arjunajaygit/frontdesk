@@ -209,7 +209,7 @@ export async function runSeed(prisma: PrismaClient, opts: SeedOptions): Promise<
   const staff = new Map<string, StaffActor>();
   const customers = new Map<string, CustomerActor>();
   // The whole credential-producing operation runs in ONE transaction holding a per-database advisory lock
-  // (final audit M02): an overlapping authorised seed/reset waits here and then sees the committed users.
+  // so an overlapping authorised seed/reset waits here and then sees the committed users.
   const created = await prisma.$transaction(
     async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${CREDENTIAL_LOCK_NAME}, 0))`;
@@ -515,7 +515,7 @@ async function main() {
   }
   const noCredentials = env.SEED_CREDENTIALS === 'none';
   // ONE connection, so the session-level advisory lock below and every seed statement share a backend: the lock
-  // serialises whole seed runs per database (final audit M02 — two authorised overlapping seeds would otherwise
+  // serialises whole seed runs per database (two authorised overlapping seeds would otherwise
   // race on users AND historical tickets). Released explicitly, and by PostgreSQL if the process dies.
   const single = new URL(url);
   single.searchParams.set('connection_limit', '1');

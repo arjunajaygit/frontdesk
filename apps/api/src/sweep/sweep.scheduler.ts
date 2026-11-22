@@ -35,7 +35,7 @@ export class SweepScheduler implements OnApplicationBootstrap, BeforeApplication
   }
 
   /**
-   * One tick. Each step is isolated (M05): retention maintenance runs even when the sweep fails, and a failure
+   * One tick. Each step is isolated: retention maintenance runs even when the sweep fails, and a failure
    * is logged only as classified metadata (never raw messages). Stale invocations are recovered inside the sweep.
    */
   tick(): Promise<void> {
@@ -63,7 +63,7 @@ export class SweepScheduler implements OnApplicationBootstrap, BeforeApplication
   }
 
   /**
-   * Final audit M03: stop new ticks and drain the in-flight tick BEFORE the HTTP server and the database close
+   * Stop new ticks and drain the in-flight tick BEFORE the HTTP server and the database close
    * (Prisma disconnects in onApplicationShutdown, the last phase). The drain is bounded by SWEEP_SHUTDOWN_DRAIN_MS;
    * if it is exceeded the invocation keeps its lease and is terminalised by recovery on the next start (fenced:
    * a late commit from this process is rejected by the lease check).

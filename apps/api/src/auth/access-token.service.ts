@@ -36,7 +36,7 @@ export class AccessTokenService {
     } catch {
       throw Errors.unauthenticated();
     }
-    // jsonwebtoken only checks exp when present: require every mandatory claim explicitly (M02).
+    // jsonwebtoken only checks exp when present: require every mandatory claim explicitly, so a token without an expiry is never accepted.
     const maxLifetime = Math.floor(ACCESS_TOKEN_TTL_MS / 1000) + 5;
     if (
       typeof payload !== 'object' ||

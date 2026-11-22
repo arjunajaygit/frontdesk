@@ -50,14 +50,14 @@ export class AuthGuard implements CanActivate {
     try {
       req.principal = await this.sessions.authenticate(cookies[COOKIE_NAMES.access]);
     } catch (e) {
-      // Unauthenticated traffic (missing/expired/forged credentials) is limited per IP, strictly (M01).
+      // Unauthenticated traffic (missing/expired/forged credentials) is limited per IP, strictly.
       if (e instanceof AppError && e.status === 401) this.limiter.consume(`authfail:ip:${req.ip}`, this.config.ANON_RATE_LIMIT_PER_MIN);
       throw e;
     }
     // Signed-in traffic is limited per verified USER, not per IP: nine agents behind one NAT get nine budgets,
-    // while one noisy user with many sessions shares a single budget (M01).
+    // while one noisy user with many sessions shares a single budget (colleagues behind one office IP never throttle each other).
     this.limiter.consume(`api:user:${req.principal.userId}`, this.config.API_RATE_LIMIT_PER_MIN);
-    // H02: a tab rendered for another session must not read or act through these cookies (enforced when sent;
+    // Session binding: a tab rendered for another session must not read or act through these cookies (enforced when sent;
     // business mutations additionally REQUIRE it in CsrfGuard).
     this.contexts.check(req.header(SESSION_CONTEXT_HEADER), req.principal.sessionId, false);
     return true;

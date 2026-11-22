@@ -37,7 +37,7 @@ const auditDigest = async (c: Client) =>
     )
   ).rows[0] as { n: number; h: string };
 
-describe('PROOF-04 foundation: ownership, effective privileges, audit immutability', () => {
+describe('audit immutability foundation: ownership, effective privileges, audit immutability', () => {
   let owner: Client, app: Client, boot: Client;
   beforeAll(async () => {
     [owner, app, boot] = await Promise.all([

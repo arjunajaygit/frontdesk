@@ -34,7 +34,7 @@ export interface AuditDetailsByAction {
 export type TicketAuditAction = keyof AuditDetailsByAction;
 
 /**
- * Domain event intent. Persistence (M3) adds id, correlationId and createdAt in the same transaction.
+ * Domain event intent. Persistence adds id, correlationId and createdAt in the same transaction.
  * Construct only through `ticketEvent()`, which binds `details` to `action` at compile time.
  */
 export interface TicketDomainEvent<A extends TicketAuditAction = TicketAuditAction> {

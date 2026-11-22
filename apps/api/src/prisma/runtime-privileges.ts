@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 
 /**
- * H04: the application must run as a RESTRICTED runtime role, otherwise database-enforced audit immutability
+ * The application must run as a RESTRICTED runtime role, otherwise database-enforced audit immutability
  * is meaningless. Verified against the live connection's EFFECTIVE privileges at startup (fail closed).
  * Violations are stable codes only — no credentials, hostnames or SQL are ever included.
  */

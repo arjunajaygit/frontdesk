@@ -32,7 +32,7 @@ export class AuthController {
 
   /**
    * Read-only session check via access OR current refresh cookie; never rotates. `?purpose=login` always issues a
-   * PRE-LOGIN token (final audit H01): the login form must work even while an old, still-valid refresh cookie is
+   * PRE-LOGIN token: the login form must work even while an old, still-valid refresh cookie is
    * present (login then replaces and revokes that session). A pre-login token authorises nothing but login.
    */
   @Public()
@@ -88,7 +88,7 @@ export class AuthController {
     // to rotation, which detects reuse and revokes the family.
     const bound = sessionId ?? (c[COOKIE_NAMES.refresh]?.split('.')[0] ?? '');
     this.csrf.verify(req.header('x-csrf-token'), c[COOKIE_NAMES.csrf], { kind: 'session', sessionId: bound });
-    // H02: a stale tab must not rotate (and adopt) a session that replaced its own.
+    // A stale tab must not rotate (and adopt) a session that replaced its own.
     if (bound) this.contexts.check(req.header(SESSION_CONTEXT_HEADER), bound, false);
     let s;
     try {
@@ -113,7 +113,7 @@ export class AuthController {
     const c = cookiesOf(req);
     const sessionId = await this.currentSession(c);
     this.csrf.verify(req.header('x-csrf-token'), c[COOKIE_NAMES.csrf], sessionId ? { kind: 'session', sessionId } : { kind: 'prelogin' });
-    // H02: a stale tab must not sign out the identity that replaced it.
+    // A stale tab must not sign out the identity that replaced it.
     if (sessionId) this.contexts.check(req.header(SESSION_CONTEXT_HEADER), sessionId, false);
     if (sessionId) await this.sessions.revoke(sessionId);
     this.cookies.clearAll(res);

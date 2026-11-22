@@ -4,7 +4,7 @@ import { ROOT, connect, dotenv, roleUrl } from '../helpers/db';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * Final audit M03 with a REAL process and a REAL SIGTERM. The test holds row locks on SLA clocks so the scheduler's
+ * Shutdown ordering with a REAL process and a REAL SIGTERM. The test holds row locks on SLA clocks so the scheduler's
  * ticket transaction is provably in flight (blocked inside PostgreSQL) when SIGTERM arrives; the locks are released
  * during the drain. Required: the in-flight transaction commits (ticket changes, audit, durable counters), the
  * invocation is terminal, the process exits by the re-raised signal, and a restart finds nothing to recover.
@@ -84,7 +84,7 @@ afterAll(async () => {
   if (db) await dropDatabase(db);
 });
 
-describe('M03: SIGTERM while a real sweep transaction is in flight', () => {
+describe('SIGTERM while a real sweep transaction is in flight', () => {
   let proc: ChildProcess | undefined;
   afterEach(() => proc?.kill('SIGKILL'));
 

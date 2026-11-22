@@ -1,4 +1,4 @@
-// Final audit H03: the release gate must reject unapproved refs, SHAs without passing mandatory checks, stale or
+// The release gate must reject unapproved refs, SHAs without passing mandatory checks, stale or
 // mismatched runs, artifact digest mismatches and non-exact signing identities. Run: node --test tests/release
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

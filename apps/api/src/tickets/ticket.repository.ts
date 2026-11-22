@@ -18,7 +18,7 @@ export class TicketRepository {
   constructor(private readonly audit: AuditWriter) {}
 
   /**
-   * Lock a ticket row. With `customerId`, ownership is part of the lock predicate (H02): a foreign ticket fails
+   * Lock a ticket row. With `customerId`, ownership is part of the lock predicate: a foreign ticket fails
    * the qualifier and is never locked or waited on, so busy-foreign and nonexistent are indistinguishable.
    */
   async lockTicket(tx: Tx, id: string, scope: { customerId?: string } = {}): Promise<TicketRow | null> {

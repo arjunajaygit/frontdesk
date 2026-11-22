@@ -64,7 +64,7 @@ describe('GitHub Actions workflows', () => {
     },
   );
 
-  it('release (H03): manual dispatch only; gate job first; elevated permissions only on environment-protected jobs', () => {
+  it('release workflow: manual dispatch only; gate job first; elevated permissions only on environment-protected jobs', () => {
     const w = load('release.yml');
     expect(Object.keys(w.on)).toEqual(['workflow_dispatch']);
     const jobs = w.jobs as Record<string, Job & { environment?: string; if?: string }>;

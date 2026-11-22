@@ -162,7 +162,7 @@ describe('intake (atomic)', () => {
   });
 });
 
-describe('exclusive claim (INC-0291 — initial coverage; forced-overlap proofs are M4)', () => {
+describe('exclusive claim (INC-0291 — basic coverage; forced-overlap races are in proof-02-claim.test.ts)', () => {
   it('two agents claiming concurrently: one 200, one 409 naming the winner; one assignee; one claim audit event', async () => {
     const id = await customerTicket(c1);
     const [r1, r2] = await Promise.all([

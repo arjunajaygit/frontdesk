@@ -41,7 +41,7 @@ export class MetricsService {
   private readonly sweepTickets = new Counter({ name: 'frontdesk_sweep_tickets_processed_total', help: 'Tickets changed by committed sweep work (process-local; durable counts are on the invocation rows).', registers: [this.registry] });
   private readonly recoveries = new Counter({ name: 'frontdesk_sweep_lease_recoveries_total', help: 'Expired sweep invocations terminalised by recovery in this process (process-local).', registers: [this.registry] });
   private readonly moreDue = new Gauge({ name: 'frontdesk_sweep_more_due', help: '1 if the last completed sweep reported more due work (backlog), else 0; NaN before the first run.', registers: [this.registry] });
-  /** Final audit L01: scheduled (SYSTEM) and manual success are separate, so a manual run cannot hide a dead scheduler. */
+  /** Scheduled (SYSTEM) and manual success are separate, so a manual run cannot hide a dead scheduler. */
   private readonly lastScheduled = new Gauge({ name: 'frontdesk_sweep_last_scheduled_success_timestamp_seconds', help: 'Unix time of the last COMPLETED scheduled (SYSTEM actor: in-process timer or authenticated external trigger) sweep in this process (0 = none yet).', registers: [this.registry] });
   private readonly lastManual = new Gauge({ name: 'frontdesk_sweep_last_manual_success_timestamp_seconds', help: 'Unix time of the last COMPLETED manual (lead/admin) sweep in this process (0 = none yet).', registers: [this.registry] });
   private readonly dbUp = new Gauge({

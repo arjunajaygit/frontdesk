@@ -57,7 +57,7 @@ export class AuditWriter {
   ) {}
 
   /**
-   * M03: `createdAt` is the RECORDING time — fresh PostgreSQL clock_timestamp() sampled at append — while
+   * `createdAt` is the RECORDING time — fresh PostgreSQL clock_timestamp() sampled at append — while
    * logical business times (publishedAt, breachedAt, completedAt, ...) stay in `details`. SLA_BREACHED.recordedAt
    * is the same recording time. Appended in the caller's transaction: visible only once it commits.
    */

@@ -10,7 +10,7 @@ import { LockHolder, Observer } from '../helpers/observe';
 import { dropDatabase, freshDatabase } from '../helpers/scratch';
 
 /**
- * PROOF-05 — lifecycle, auto-close/reopen/linked tickets and scheduler correctness on real PostgreSQL.
+ * Lifecycle, auto-close/reopen/linked tickets and scheduler correctness on real PostgreSQL.
  * Business time is controlled only through DATA fixtures (stored deadlines moved into the past); there is
  * no clock override anywhere in the application. Exact cutoff equality (+1 ms) is proven at the domain and
  * SQL-snapshot level (tests/unit/domain/*, tests/integration/sweep-store.test.ts) and re-run with this proof.
@@ -84,7 +84,7 @@ const breaches = async (id: string) =>
     )
   )[0]!.n;
 
-describe('PROOF-05: overlapping sweep workers on separate connections', () => {
+describe('lifecycle and scheduler: overlapping sweep workers on separate connections', () => {
   it('two invocations RUNNING at the same time transition each ticket exactly once; counters reflect commits only', async () => {
     const ids = await Promise.all([1, 2, 3, 4, 5, 6].map(() => overdue()));
     // Barrier: every progress write waits until BOTH invocations are RUNNING, forcing genuine overlap.
@@ -120,7 +120,7 @@ describe('PROOF-05: overlapping sweep workers on separate connections', () => {
   });
 });
 
-describe('PROOF-05: crash after a ticket commit, before FINISH', () => {
+describe('lifecycle and scheduler: crash after a ticket commit, before FINISH', () => {
   it('recovers once to FAILED, same-key replay is a stable 503, a new key catches up without duplicates', async () => {
     const first = await overdue();
     const second = await overdue();
@@ -162,7 +162,7 @@ describe('PROOF-05: crash after a ticket commit, before FINISH', () => {
   });
 });
 
-describe('PROOF-05: backlog beyond one batch, no starvation behind old recorded breaches', () => {
+describe('lifecycle and scheduler: backlog beyond one batch, no starvation behind old recorded breaches', () => {
   it('bounded runs report moreDue and the next run drains; older recorded breaches are never re-selected', async () => {
     const small = await startApp(db, { SWEEP_BATCH_SIZE: '2', SWEEP_MAX_BATCHES: '1' });
     try {
@@ -181,7 +181,7 @@ describe('PROOF-05: backlog beyond one batch, no starvation behind old recorded 
   });
 });
 
-describe('PROOF-05: customer reply racing the sweep on a ticket past its inactivity cutoff', () => {
+describe('lifecycle and scheduler: customer reply racing the sweep on a ticket past its inactivity cutoff', () => {
   it('reply holds the ticket; the sweep skips it (SKIP LOCKED); exactly one closure and one linked child', async () => {
     const id = await waitingPastCutoff();
     const holder = await LockHolder.hold(db, `SELECT id FROM "Ticket" WHERE id=$1 FOR UPDATE`, [
@@ -210,7 +210,7 @@ describe('PROOF-05: customer reply racing the sweep on a ticket past its inactiv
   });
 });
 
-describe('PROOF-05: delayed-sweep equivalence and linked-ticket replay', () => {
+describe('lifecycle and scheduler: delayed-sweep equivalence and linked-ticket replay', () => {
   it('contact after the cutoff gives the same outcome whether or not a sweep ran first; replay creates no second child', async () => {
     const swept = await waitingPastCutoff();
     await lead.post('/api/admin/run-sla-sweep'); // the sweep ran first for this one ...
@@ -244,7 +244,7 @@ describe('PROOF-05: delayed-sweep equivalence and linked-ticket replay', () => {
   });
 });
 
-describe('PROOF-05: restart catch-up without browser traffic', () => {
+describe('lifecycle and scheduler: restart catch-up without browser traffic', () => {
   it('a fresh process with the scheduler enabled processes work that became due while it was down', async () => {
     const id = await overdue();
     await t.close(); // "down"

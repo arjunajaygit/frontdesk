@@ -31,8 +31,9 @@ export interface CommandOutcome {
 type Locked = { agg: TicketAggregate; now: Instant };
 
 /**
- * Re-authorises a stored outcome against CURRENT state before it is released (M01). It never re-runs the
- * historical transition; it only proves the caller may still see every resource the stored body exposes.
+ * Re-authorises a stored outcome against CURRENT state before it is released, so access revoked since the first
+ * attempt is respected. It never re-runs the historical transition; it only proves the caller may still see every
+ * resource the stored body exposes.
  */
 type ReplayGuard = (tx: Tx, storedBody: unknown) => Promise<void>;
 
@@ -64,7 +65,9 @@ export class TicketCommandService {
   staffIntake(ctx: CommandContext, input: { customerId: string; subject: string; body: string; priority: Priority }) {
     return this.mutate(ctx, null, input, this.staffCanRead(), async (tx, lc) => {
       const customer = await tx.user.findUnique({ where: { id: input.customerId }, select: { role: true } });
-      if (!customer || customer.role !== 'CUSTOMER') throw Errors.badRequest('UNKNOWN_CUSTOMER', 'customerId does not identify a customer.');
+      if (!customer || customer.role !== 'CUSTOMER') {
+        throw Errors.badRequest('UNKNOWN_CUSTOMER', 'customerId does not identify a customer.');
+      }
       const now = await this.repo.dbNow(tx);
       const r = this.domain(() => lc.staffIntake({ actor: toActor(ctx.principal), ...input, now }));
       await this.repo.insertNew(tx, r, ctx.requestId);
@@ -104,15 +107,21 @@ export class TicketCommandService {
   }
 
   requestInformation(ctx: CommandContext, ticketId: string, body: string) {
-    return this.staffCommand(ctx, ticketId, { body }, 'assignee', (lc, l) => lc.requestInformation(l.agg, toActor(ctx.principal), body, l.now));
+    return this.staffCommand(ctx, ticketId, { body }, 'assignee', (lc, l) =>
+      lc.requestInformation(l.agg, toActor(ctx.principal), body, l.now),
+    );
   }
 
   resolve(ctx: CommandContext, ticketId: string, body: string | undefined) {
-    return this.staffCommand(ctx, ticketId, body === undefined ? {} : { body }, 'assignee', (lc, l) => lc.resolve(l.agg, toActor(ctx.principal), body, l.now));
+    return this.staffCommand(ctx, ticketId, body === undefined ? {} : { body }, 'assignee', (lc, l) =>
+      lc.resolve(l.agg, toActor(ctx.principal), body, l.now),
+    );
   }
 
   changePriority(ctx: CommandContext, ticketId: string, priority: Priority) {
-    return this.staffCommand(ctx, ticketId, { priority }, 'assignee', (lc, l) => lc.changePriority(l.agg, toActor(ctx.principal), priority, l.now));
+    return this.staffCommand(ctx, ticketId, { priority }, 'assignee', (lc, l) =>
+      lc.changePriority(l.agg, toActor(ctx.principal), priority, l.now),
+    );
   }
 
   // ------------------------------------------------------------------ customer commands
@@ -149,7 +158,10 @@ export class TicketCommandService {
         throw e;
       }
       await this.repo.persist(tx, l.agg, r, ctx.requestId, guard);
-      return { status: 200, body: await this.views.staffTicket(tx, ticketId, Math.max(l.now, r.aggregate.ticket.updatedAt), ctx.principal.userId) };
+      return {
+        status: 200,
+        body: await this.views.staffTicket(tx, ticketId, Math.max(l.now, r.aggregate.ticket.updatedAt), ctx.principal.userId),
+      };
     });
   }
 
@@ -161,7 +173,7 @@ export class TicketCommandService {
   ): Promise<CommandOutcome> {
     const replayGuard = this.customerOwns(ctx, (b) => [ticketId, idOf(b, 'ticket.id')]);
     return this.mutate(ctx, ticketId, { body }, replayGuard, async (tx, lc) => {
-      // Ownership is part of the lock predicate: foreign tickets are never locked (H02).
+      // Ownership is part of the lock query, so a customer can never lock (or learn about) someone else's ticket.
       const l = await this.lock(tx, ticketId, ctx.principal.userId);
       const r = this.domain(() => run(lc, l));
       if (r.outcome === 'SAME_TICKET') {
@@ -200,7 +212,12 @@ export class TicketCommandService {
     return this.uow
       .run(async (tx) => {
         replayed = false;
-        const res = await this.idem.reserve(tx, { actorId: ctx.principal.userId, operation: ctx.operation, key: ctx.idempotencyKey, requestHash: hash });
+        const res = await this.idem.reserve(tx, {
+          actorId: ctx.principal.userId,
+          operation: ctx.operation,
+          key: ctx.idempotencyKey,
+          requestHash: hash,
+        });
         if (res.kind === 'REPLAY') {
           await replayGuard(tx, res.body); // current authorisation BEFORE releasing the stored outcome
           replayed = true;
@@ -222,7 +239,7 @@ export class TicketCommandService {
       );
   }
 
-  // ------------------------------------------------------------------ replay guards (M01)
+  // ------------------------------------------------------------------ replay guards
 
   /** Staff share one support team: replay needs the ticket to still exist (staff read access). */
   private staffCanRead(ticketId?: string): ReplayGuard {

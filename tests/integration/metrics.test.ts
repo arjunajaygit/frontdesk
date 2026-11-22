@@ -7,7 +7,7 @@ import { Browser, newKey, signedIn, startApp, TestApp } from '../helpers/http';
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * M7 metrics on REAL PostgreSQL through the real HTTP pipeline: counts match committed database truth, replays
+ * Prometheus metrics on REAL PostgreSQL through the real HTTP pipeline: counts match committed database truth, replays
  * and losing claims are classified correctly, labels carry no identities, and the listener is internal + authenticated.
  */
 const STAFF = [
@@ -57,7 +57,7 @@ afterAll(async () => {
   await dropDatabase(db);
 });
 
-describe('M7 Prometheus metrics (real PostgreSQL)', () => {
+describe('Prometheus metrics (real PostgreSQL)', () => {
   it('listener is internal and authenticated; the public app port does not serve metrics', async () => {
     expect((await scrape(null)).status).toBe(401);
     expect((await scrape('x'.repeat(TOKEN.length))).status).toBe(401);
@@ -148,7 +148,7 @@ describe('M7 Prometheus metrics (real PostgreSQL)', () => {
     ).toBeGreaterThanOrEqual(1);
     expect(await value('frontdesk_sweep_more_due')).toBe(r.body.moreDue ? 1 : 0);
     expect(await value('frontdesk_sweep_last_manual_success_timestamp_seconds')).toBeGreaterThan(0);
-    expect(await value('frontdesk_sweep_last_scheduled_success_timestamp_seconds')).toBe(0); // L01: manual never counts as scheduled
+    expect(await value('frontdesk_sweep_last_scheduled_success_timestamp_seconds')).toBe(0); // a manual run never counts as scheduled
   });
 
   it('privacy: the full exposition contains no ids, emails, subjects, message bodies, tokens or private-note content', async () => {

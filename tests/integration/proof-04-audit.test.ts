@@ -4,7 +4,7 @@ import { Browser, conforms, newKey, signedIn, startApp, TestApp } from '../helpe
 import { cloneTemplate, dropDatabase } from '../helpers/scratch';
 
 /**
- * PROOF-04 / INC-0318 — immutable, attributable, transactionally consistent audit.
+ * INC-0318 — immutable, attributable, transactionally consistent audit.
  * Trusted-owner boundary (documented): the schema owner can disable triggers via DDL; no tamper-proof claim.
  */
 let t: TestApp;
@@ -39,7 +39,7 @@ afterAll(async () => {
   await dropDatabase(db);
 });
 
-describe('PROOF-04: append-only enforcement in PostgreSQL', () => {
+describe('audit immutability: append-only enforcement in PostgreSQL', () => {
   it('runtime role: UPDATE/DELETE/TRUNCATE denied by privilege and triggers cannot be disabled; owner: trigger rejects; rows unchanged', async () => {
     const before = await digest();
     const seeded = (
@@ -69,7 +69,7 @@ describe('PROOF-04: append-only enforcement in PostgreSQL', () => {
   });
 });
 
-describe('PROOF-04: attribution, correlation and causal reconstruction through the staff audit API', () => {
+describe('audit immutability: attribution, correlation and causal reconstruction through the staff audit API', () => {
   it('reconstructs WHY a ticket was late and WHEN the public reply became visible', async () => {
     const created = await customer.post('/api/customer/tickets', {
       subject: 'Why late?',
