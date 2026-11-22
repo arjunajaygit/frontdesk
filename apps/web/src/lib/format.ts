@@ -1,10 +1,13 @@
 const IST = 'Asia/Kolkata';
 
 const dateTime = new Intl.DateTimeFormat('en-IN', { timeZone: IST, weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+const dateTimeShort = new Intl.DateTimeFormat('en-IN', { timeZone: IST, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
 const dateTimeYear = new Intl.DateTimeFormat('en-IN', { timeZone: IST, day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
 /** "Mon, 23 Nov, 14:30 IST" — the business timezone is always labelled. */
 export const formatIst = (iso: string | null | undefined): string => (iso ? `${dateTime.format(new Date(iso))} IST` : '—');
+/** Compact form for dense lists ("22 Nov, 17:27"); callers expose the IST label via title / screen-reader text. */
+export const formatIstShort = (iso: string): string => dateTimeShort.format(new Date(iso));
 /** Full precision for audit evidence, including seconds and the year. */
 export const formatIstFull = (iso: string): string => `${dateTimeYear.format(new Date(iso))} IST`;
 export const utcIso = (iso: string): string => new Date(iso).toISOString();

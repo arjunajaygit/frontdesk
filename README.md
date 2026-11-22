@@ -89,7 +89,7 @@ Only a public staff reply counts as the first response. An internal note does no
 3. The application opens the correct area for your account:
    - **Customer** → **Support portal** (`/portal`).
    - **Agent / Lead / Admin** → **Staff workspace** (`/staff`).
-4. Use **Sign out** when you are finished.
+4. Use **Sign out** when you are finished. Customers find it in the top bar. Staff use the sign-out icon next to their name at the bottom of the sidebar (on phones, open the menu first).
 
 **Where do I get an account?** This demo does **not** have a public self-registration form. A project owner/reviewer provides the hosted credentials privately. For a local demo, run `npm run demo:db` and read `.local/credentials.frontdesk_demo.json` on **your own computer**. Never post passwords in an issue, screenshot, README or commit.
 
@@ -115,7 +115,7 @@ Open a ticket from **Your tickets** to see its messages. Type in the **Reply** b
 
 **4. Respond when staff ask for information**
 
-When an agent sends **Request information**, reply with the missing details. If the ticket is still in its waiting window, your reply returns it to **In progress** and the resolution clock resumes. The app does not send an email notification as part of this feature; check the portal itself.
+When an agent sends **Request information**, the ticket shows **Waiting for your reply**. Reply with the missing details. If the ticket is still in its waiting window, your reply returns it to **In progress** and the resolution clock resumes. The app does not send an email notification as part of this feature; check the portal itself.
 
 **5. Reopen or create a follow-up**
 
@@ -124,7 +124,7 @@ When an agent sends **Request information**, reply with the missing details. If 
 
 **6. Download a conversation**
 
-Inside a ticket, under **Download this conversation**, select **JSON** or **CSV**. The export contains customer-visible conversation information, not internal staff notes.
+Inside a ticket, next to **Download conversation**, select **JSON** or **CSV**. The export contains customer-visible conversation information, not internal staff notes.
 
 ### B. Agent guide — work on tickets
 
@@ -142,7 +142,7 @@ The **Staff workspace** has a navigation panel on the left, a ticket list, and a
 | **Resolved** | Tickets marked resolved, with a limited customer reopen window. |
 | **Closed** | Tickets that have been closed or expired. |
 
-Use **Filter by priority** to show only Urgent, Medium or Low. Select a ticket row to open it. The refresh icon reloads the list; **Load more tickets** shows additional records.
+Use the priority filter at the top of the list (it shows **All priorities** by default) to show only Urgent, Medium or Low. Each row shows the priority, ticket reference, creation time (IST), subject, assignee, status and both SLA clocks; a red left edge marks a ticket with an overdue clock. Select a ticket row to open it. The refresh icon reloads the list; **Load more tickets** shows additional records.
 
 **2. Claim a ticket**
 
@@ -155,7 +155,7 @@ If another agent claims the same ticket first, you will see a conflict message t
 
 **3. Understand the ticket detail screen**
 
-The top area shows the ticket reference, **priority**, **status**, customer request, assigned agent, and creation/update times. Below it are **Response** and **Resolution** SLA cards. These show separate deadlines and whether each clock is running, paused, completed or overdue.
+The top area shows the ticket reference, **priority**, **status**, customer request, assigned agent, and creation/update times. The **Response** and **Resolution** SLA cards appear below the header, or in a **Service levels** panel on the right on wide screens (1440 px and up). They show the remaining working time, a bar for how much of the working-time budget is used, the deadline, and whether each clock is on track, paused, completed or breached. All of these values come from the server.
 
 Use **Conversation** to read messages, or **SLA history & audit** to see recorded actions, time changes and breaches. The **Load older messages** button retrieves earlier conversation items. Timestamps display in IST.
 
@@ -169,13 +169,13 @@ At the bottom of a ticket you own, choose the intended message type **before** t
 | **Internal note** | **Add internal note** | Staff only | No SLA clock is completed or paused. |
 | **Request information** | **Send request & wait** | Customer and staff | Requests an answer, puts the ticket into **Waiting** and pauses the resolution clock. |
 
-The modes keep **separate drafts**, so switching from a private note to a public reply does not send your note as a public message. You can also use **Ctrl + Enter** (Windows/Linux) or **⌘ + Enter** (Mac) to send the currently selected message type.
+On phones the three modes are labelled **Reply**, **Note** and **Request**. Internal notes are always amber and marked **Internal note · team only**, both in the composer and in the conversation. The modes keep **separate drafts**, so switching from a private note to a public reply does not send your note as a public message. You can also use **Ctrl + Enter** (Windows/Linux) or **⌘ + Enter** (Mac) to send the currently selected message type.
 
 While a ticket is **Waiting**, the assigned agent can add internal notes, but cannot send another ordinary public reply or information request from that composer until the customer responds.
 
 **5. Change priority**
 
-Open an **In progress** or **Waiting** ticket assigned to you. Choose a new value in **Ticket priority**, then select **Apply priority**. Both SLA calculations use time already consumed. **Changing priority does not restart the clocks**; the audit history records the change.
+Open an **In progress** or **Waiting** ticket assigned to you. Choose a new value in the priority menu in the ticket header, then select **Apply priority**. Both SLA calculations use time already consumed. **Changing priority does not restart the clocks**; the audit history records the change.
 
 **6. Resolve a ticket**
 

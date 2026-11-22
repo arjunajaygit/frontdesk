@@ -1,12 +1,20 @@
-import { Headset, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Clock3, Lock, ShieldCheck } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
+import { LogoMark } from '@/components/ui/identity';
+import { Notice } from '@/components/ui/notice';
 import { ApiError } from '@/lib/api';
 import { useAuth } from './auth';
 
 export const homeFor = (role: string) => (role === 'CUSTOMER' ? '/portal' : '/staff');
+
+const FACTS = [
+  { icon: Clock3, text: 'SLA clocks count working hours only' },
+  { icon: ShieldCheck, text: 'Append-only audit trail' },
+  { icon: Lock, text: 'Internal notes never reach customers' },
+];
 
 export function LoginPage() {
   const { status, viewer, login, logout, endedReason } = useAuth();
@@ -36,64 +44,73 @@ export function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-full lg:grid-cols-[minmax(0,1fr)_28rem]">
-      <aside className="nav-surface hidden flex-col justify-between bg-nav p-10 text-nav-text lg:flex">
-        <div className="flex items-center gap-2 text-white">
-          <Headset className="h-6 w-6 text-[#7ee0d4]" aria-hidden="true" />
-          <span className="text-lg font-semibold tracking-tight">Frontdesk</span>
+    <div className="fd-login-backdrop flex min-h-full flex-col">
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:py-16">
+        <div className="mb-7 flex flex-col items-center text-center">
+          <LogoMark className="h-11 w-11 drop-shadow-sm" />
+          <p className="mt-3 text-heading font-semibold tracking-[-0.02em] text-ink">Frontdesk</p>
+          <p className="mt-0.5 text-body text-ink-3">Arvo Systems support workspace</p>
         </div>
-        <div className="max-w-md space-y-4">
-          <h2 className="text-2xl font-semibold leading-snug text-white">Support that keeps its promises.</h2>
-          <p className="text-[13px] leading-relaxed">
-            Independent response and resolution clocks that count only working time, a tamper-evident audit trail, and a customer portal that can never see
-            internal notes.
-          </p>
-        </div>
-        <p className="flex items-center gap-2 text-xs">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Arvo Systems support workspace
-        </p>
-      </aside>
-      <main className="flex items-center justify-center p-6">
-        <form onSubmit={submit} className="w-full max-w-sm space-y-4" aria-labelledby="signin-title">
-          <div className="flex items-center gap-2 lg:hidden">
-            <Headset className="h-5 w-5 text-brand" aria-hidden="true" />
-            <span className="font-semibold">Frontdesk</span>
-          </div>
+
+        <form
+          onSubmit={submit}
+          aria-labelledby="signin-title"
+          className="glass-strong w-full max-w-[25rem] animate-rise-in space-y-5 rounded-xl border border-white/70 p-6 shadow-pop ring-1 ring-ink/[0.06] sm:p-7"
+        >
           <div>
-            <h1 id="signin-title" className="text-xl font-semibold">
+            <h1 id="signin-title" className="text-heading font-semibold tracking-[-0.01em] text-ink">
               Sign in
             </h1>
-            <p className="mt-1 text-[13px] text-ink-2">Use your Arvo staff or customer account.</p>
+            <p className="mt-1 text-body text-ink-2">Use your Arvo staff or customer account.</p>
           </div>
           {endedReason === 'expired' ? (
-            <p role="status" className="rounded-md border border-warn/30 bg-warn-soft p-3 text-[13px] text-warn-ink">
+            <Notice tone="warn" role="status">
               Your session ended. Please sign in again.
-            </p>
+            </Notice>
           ) : null}
           {endedReason === 'elsewhere' ? (
-            <p role="status" className="rounded-md border border-warn/30 bg-warn-soft p-3 text-[13px] text-warn-ink">
+            <Notice tone="warn" role="status">
               You were signed out in another tab or window. Unsaved changes on this page were discarded.
-            </p>
+            </Notice>
           ) : null}
           {endedReason === 'logout-unconfirmed' ? (
-            <div role="alert" className="space-y-2 rounded-md border border-danger/30 bg-danger-soft p-3 text-[13px] text-danger-ink">
+            <Notice
+              tone="bad"
+              role="alert"
+              action={
+                <Button type="button" variant="secondary" size="sm" onClick={() => void logout()}>
+                  Retry sign-out
+                </Button>
+              }
+            >
               <p>We could not confirm sign-out with the server. Your session may still be active on this device.</p>
-              <Button type="button" variant="secondary" size="sm" onClick={() => void logout()}>
-                Retry sign-out
-              </Button>
-            </div>
+            </Notice>
           ) : null}
-          <Field label="Email">{(p) => <Input {...p} type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
-          <Field label="Password">{(p) => <Input {...p} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
+          <div className="space-y-4">
+            <Field label="Email">
+              {(p) => <Input {...p} type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.example" className="h-10" />}
+            </Field>
+            <Field label="Password">{(p) => <Input {...p} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-10" />}</Field>
+          </div>
           {error ? (
-            <p role="alert" className="text-[13px] font-medium text-danger-ink">
+            <Notice tone="bad" role="alert">
               {error}
-            </p>
+            </Notice>
           ) : null}
-          <Button type="submit" variant="primary" size="lg" className="w-full" disabled={busy}>
+          <Button type="submit" variant="primary" size="lg" className="group w-full" disabled={busy}>
             {busy ? 'Signing in…' : 'Sign in'}
+            {busy ? null : <ArrowRight className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />}
           </Button>
         </form>
+
+        <ul className="mt-8 flex max-w-xl flex-wrap justify-center gap-x-5 gap-y-2 text-meta text-ink-3">
+          {FACTS.map(({ icon: Icon, text }) => (
+            <li key={text} className="inline-flex items-center gap-1.5">
+              <Icon className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+              {text}
+            </li>
+          ))}
+        </ul>
       </main>
     </div>
   );
