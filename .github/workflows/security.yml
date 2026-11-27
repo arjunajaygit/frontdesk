@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { fetch-depth: 0, persist-credentials: false }
       - name: Scan history with redaction (secret values are never printed)
         run: |
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false }
       - name: Semgrep (metrics off; findings fail the job)
         run: |
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version-file: .nvmrc, cache: npm }
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { persist-credentials: false }
       # Rebuilt on every run (incl. the weekly schedule) on a cache-less runner: `apt-get upgrade` in the base stage
       # picks up newly published OS fixes, and Trivy downloads a fresh vulnerability DB. Scanning an old immutable
